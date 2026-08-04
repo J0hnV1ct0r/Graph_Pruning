@@ -125,7 +125,7 @@ class DataHandler:
             idxs = t.stack([row, col], dim=0)
             vals = t.from_numpy(normed_asym_mat.data).float()
             shape = t.Size(normed_asym_mat.shape)
-            asym_adj = t.sparse.FloatTensor(idxs, vals, shape)
+            asym_adj = t.sparse_coo_tensor(idxs, vals, shape)
             return asym_adj
         elif unidirectional_for_asym:
             mat = (mat != 0) * 1.0

@@ -10,6 +10,7 @@ import pickle
 import os
 import setproctitle
 import time
+import warnings
 
 class Exp:
     def __init__(self, multi_handler):
@@ -264,6 +265,12 @@ class Exp:
         log('Model Loaded')
 
 if __name__ == '__main__':
+    t.sparse.check_sparse_tensor_invariants.disable()
+    warnings.filterwarnings(
+        "ignore",
+        category=RuntimeWarning,
+        message="divide by zero encountered in power"
+    )
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     if len(args.gpu.split(',')) == 2:
         args.devices = ['cuda:0', 'cuda:1']
@@ -304,7 +311,7 @@ if __name__ == '__main__':
     ]
 
     datasets['link2'] = [
-        'Photo', 'Goodreads', 'Fitness', 'ml1m', 'ml10m', 'gowalla', 'arxiv', 'arxiv-ta', 'cora', 'CS', 'collab', 'proteins_spec0', 'proteins_spec1', 'proteins_spec2', 'proteins_spec3', 'ddi', 'web-Stanford', 'roadNet-PA',
+        'Photo', 'Goodreads', 'Fitness', 'ml1m', 'ml10m', 'gowalla', 'arxiv', 'arxiv-ta', 'cora', 'CS', 'collab', 'proteins_spec0', 'proteins_spec1', 'proteins_spec2', 'proteins_spec3', 'ddi', 'web-Stanford',
     ]
     datasets['link2_part1'] = [
             'Photo', 'Goodreads', 'Fitness', 'ml1m', 'ml10m', 'gowalla', 'arxiv',

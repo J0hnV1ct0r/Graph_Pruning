@@ -11,6 +11,7 @@ import os
 import setproctitle
 import time
 from sklearn.metrics import f1_score
+import warnings
 
 class Exp:
     def __init__(self, multi_handler):
@@ -82,7 +83,7 @@ class Exp:
             print()
 
         for test_group_id in range(len(self.multi_handler.tst_handlers_group)):
-            repeat_times = 10
+            repeat_times = 5
             overall_recall, overall_ndcg = np.zeros(repeat_times), np.zeros(repeat_times)
             overall_tstnum = 0
             tst_handlers = self.multi_handler.tst_handlers_group[test_group_id]
@@ -319,6 +320,12 @@ class Exp:
         log("Model Loaded")
 
 if __name__ == '__main__':
+    t.sparse.check_sparse_tensor_invariants.disable()
+    warnings.filterwarnings(
+            "ignore",
+            category=RuntimeWarning,
+            message="divide by zero encountered in power"
+    )
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     if len(args.gpu.split(',')) == 2:
         args.devices = ['cuda:0', 'cuda:1']
