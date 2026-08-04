@@ -3,6 +3,6 @@
 venv/
 env/
 
-AnyGraph-main/Datasets/*
-AnyGraph-main/models/*
-AnyGraph-main/imgs/*
+AnyGraph/Datasets/*
+AnyGraph/models/*
+AnyGraph/imgs/*
