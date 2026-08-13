@@ -12,7 +12,6 @@ import setproctitle
 import time
 from sklearn.metrics import f1_score
 import warnings
-import pandas as pd
 
 class Exp:
     def __init__(self, multi_handler):
@@ -122,104 +121,6 @@ class Exp:
             overall_res['NDCG_std'] = overall_ndcg.std()
             log(self.make_print('Overall Test', args.epoch, overall_res, False))
         self.save_history()
-
-    def evaluate(self, repeat_times=5):
-
-        self.model.eval()
-
-        results = []
-
-        for test_group_id in range(len(self.multi_handler.tst_handlers_group)):
-
-            overall_acc = np.zeros(repeat_times)
-            overall_f1 = np.zeros(repeat_times)
-            overall_tstnum = 0
-
-            tst_handlers = self.multi_handler.tst_handlers_group[test_group_id]
-
-            if args.assignment == 'one-graph-one-expert':
-                self.model.assign_experts(
-                    tst_handlers,
-                    reca=False,
-                    log_assignment=True
-                )
-
-            for i, handler in enumerate(tst_handlers):
-
-                mets = {}
-
-                for _ in range(repeat_times):
-
-                    handler.make_projectors()
-
-                    if args.assignment != 'one-graph-one-expert':
-                        self.model.assign_experts(
-                            [handler],
-                            reca=False,
-                            log_assignment=False
-                        )
-
-                    reses = self.test_epoch(
-                        handler,
-                        i if args.assignment == 'one-graph-one-expert' else 0
-                    )
-
-                    for met in reses:
-                        mets.setdefault(met, []).append(reses[met])
-
-                tstnum = reses["tstNum"]
-
-                tot_reses = {}
-
-                for met in reses:
-
-                    arr = np.asarray(mets[met])
-
-                    tot_reses[f"{met}_mean"] = arr.mean()
-                    tot_reses[f"{met}_std"] = arr.std()
-
-                overall_acc += np.asarray(mets["Acc"]) * tstnum
-                overall_f1 += np.asarray(mets["F1"]) * tstnum
-                overall_tstnum += tstnum
-
-                log(
-                    self.make_print(
-                        "Test",
-                        args.epoch,
-                        tot_reses,
-                        False,
-                        handler.data_name
-                    )
-                )
-
-                results.append({
-                    "Dataset": handler.data_name,
-                    **tot_reses
-                })
-
-            overall_acc /= overall_tstnum
-            overall_f1 /= overall_tstnum
-
-            overall = {
-                "Acc_mean": overall_acc.mean(),
-                "Acc_std": overall_acc.std(),
-                "F1_mean": overall_f1.mean(),
-                "F1_std": overall_f1.std()
-            }
-
-            log(
-                self.make_print(
-                    "Overall Test",
-                    args.epoch,
-                    overall,
-                    False,
-                    data_name="OVERALL"
-                )
-            )
-            overall["Dataset"] = "OVERALL"
-            results.append(overall)
-
-        return pd.DataFrame(results)
 
     def print_model_size(self):
         total_params = 0
@@ -391,21 +292,32 @@ class Exp:
         t.save(content, '../Models/' + args.save_path + '.mod')
         log('Model Saved: %s' % args.save_path)
 
-    def load_model(self, checkpoint):
-
-        ckp = t.load(
-            "./Models/" + checkpoint + ".mod",
-            weights_only=False
+    def load_model(self):
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        model_path = os.path.join(
+            "AnyGraph/Models",
+            args.load_model + ".mod"
         )
 
-        pretrained = ckp["model"]
-
-        self.model.load_state_dict(
-            pretrained.state_dict(),
-            strict=False
+        history_path = os.path.join(
+            "AnyGraph/History",
+            args.load_model + ".his"
         )
 
-        log(f"Loaded {checkpoint}")
+        ckp = t.load(model_path, weights_only=False)
+
+        self.model = ckp["model"]
+
+        self.opt = t.optim.Adam(
+            self.model.parameters(),
+            lr=args.lr,
+            weight_decay=0
+        )
+
+        with open(history_path, "rb") as fs:
+            self.metrics = pickle.load(fs)
+
+        log("Model Loaded")
 
 if __name__ == '__main__':
     t.sparse.check_sparse_tensor_invariants.disable()

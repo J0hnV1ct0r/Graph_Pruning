@@ -1,13 +1,13 @@
 import pickle
 import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix, dok_matrix
-from params import args
+from node_classification.params import args
 import scipy.sparse as sp
 from Utils.TimeLogger import log
 import torch as t
 import torch.utils.data as data
 import torch_geometric.transforms as T
-from model import Feat_Projector, Adj_Projector, TopoEncoder
+from node_classification.model import Feat_Projector, Adj_Projector, TopoEncoder
 import os
 
 class MultiDataHandler:
