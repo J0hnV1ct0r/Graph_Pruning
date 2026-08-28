@@ -340,7 +340,7 @@ class Exp:
             ep_acc, ep_tot = 0, 0
             steps = len(tst_loader)
             for i, batch_data in enumerate(tst_loader):
-                nodes, labels = list(map(lambda x: x.long().cuda(), batch_data))
+                nodes, labels = list(map(lambda x: x.long().to(args.devices[0]), batch_data))
                 feats = handler.projectors
                 preds = expert.pred_for_node_test(nodes, class_num, feats, rerun_embed=False if i!=0 else True)
                 if i == 0:
@@ -395,6 +395,7 @@ class Exp:
 
         ckp = t.load(
             "./Models/" + checkpoint + ".mod",
+            map_location="cpu",
             weights_only=False
         )
 

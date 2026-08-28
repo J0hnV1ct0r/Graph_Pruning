@@ -3,6 +3,21 @@
 venv/
 env/
 
+# Datasets e Modelos pesados
 AnyGraph/Datasets/*
+AnyGraph/Models/*
 AnyGraph/models/*
 AnyGraph/imgs/*
+*.mod
+*.tar.gz
+*.zip
+
+# Python & Jupyter cache
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+results/
+Block_Influence_results/
+Global_pruining_results/

@@ -60,7 +60,7 @@ class MLP(nn.Module):
         self.dropout = nn.Dropout(p=args.drop_rate)
     
     def forward(self, embeds):
-        for i in range(args.fc_layer):
+        for i in range(len(self.dense_layers)):
             embeds = self.layer_norms[i](self.dropout(self.dense_layers[i](embeds)) + embeds)
         return embeds
 
