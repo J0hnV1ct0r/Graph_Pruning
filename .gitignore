@@ -19,5 +19,4 @@ __pycache__/
 .ipynb_checkpoints/
 
 results/
-Block_Influence_results/
 Global_pruining_results/
