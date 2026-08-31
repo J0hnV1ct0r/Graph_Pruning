@@ -8,6 +8,8 @@ AnyGraph/Datasets/*
 AnyGraph/Models/*
 AnyGraph/models/*
 AnyGraph/imgs/*
+OpenGraph/datasets/*
+OpenGraph/models/*
 *.mod
 *.tar.gz
 *.zip
