@@ -106,7 +106,7 @@ class DataHandler:
         idxs = t.stack([row, col], dim=0)
         vals = t.from_numpy(normed_asym_mat.data).float()
         shape = t.Size(normed_asym_mat.shape)
-        asym_adj = t.sparse.FloatTensor(idxs, vals, shape)
+        asym_adj = t.sparse_coo_tensor(idxs,vals,shape,check_invariants=False)
         if mat.shape[0] == mat.shape[1]:
             return asym_adj, asym_adj
         else:
@@ -123,7 +123,7 @@ class DataHandler:
             idxs = t.from_numpy(np.vstack([mat.row, mat.col]).astype(np.int64))
             vals = t.from_numpy(mat.data.astype(np.float32))
             shape = t.Size(mat.shape)
-            return t.sparse.FloatTensor(idxs, vals, shape), asym_adj
+            return t.sparse_coo_tensor(idxs, vals, shape, check_invariants=False), asym_adj
 
     def load_data(self):
         trn_mat = self.load_one_file(self.trnfile)

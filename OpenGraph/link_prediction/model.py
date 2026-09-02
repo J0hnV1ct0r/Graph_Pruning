@@ -291,7 +291,7 @@ class OpenGraph(nn.Module):
         anc_embeds = final_embeds[ancs]
         cand_embeds = final_embeds[-cand_size:]
 
-        mask_mat = t.sparse.FloatTensor(trn_mask, t.ones(trn_mask.shape[1]).cuda(), t.Size([ancs.shape[0], cand_size]))
+        mask_mat = t.sparse_coo_tensor(trn_mask, t.ones(trn_mask.shape[1]).cuda(), t.Size([ancs.shape[0], cand_size]), check_invariants=False)
         dense_mat = mask_mat.to_dense()
 
         all_preds = anc_embeds @ cand_embeds.T * (1 - dense_mat) - dense_mat * 1e8

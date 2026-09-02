@@ -219,14 +219,52 @@ class Exp:
         log('Model Saved: %s' % args.save_path)
 
     def load_model(self):
-        ckp = t.load('../Models/' + args.load_model + '.mod')
-        self.model = ckp['model']
-        self.opt = t.optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=0)
 
-        with open('../History/' + args.load_model + '.his', 'rb') as fs:
+        base_dir = os.path.dirname(
+            os.path.abspath(__file__)
+        )
+
+        model_path = os.path.abspath(
+            os.path.join(
+                base_dir,
+                '..',
+                'Models',
+                args.load_model + '.mod'
+            )
+        )
+
+        history_path = os.path.abspath(
+            os.path.join(
+                base_dir,
+                '..',
+                'History',
+                args.load_model + '.his'
+            )
+        )
+
+        print("Loading model from:", model_path)
+
+        ckp = t.load(
+            model_path,
+            map_location="cpu",
+            weights_only=False
+        )
+
+        self.model = ckp['model'].to(args.devices[1])
+
+        self.opt = t.optim.Adam(
+            self.model.parameters(),
+            lr=args.lr,
+            weight_decay=0
+        )
+
+        print("Loading history from:", history_path)
+
+        with open(history_path, 'rb') as fs:
             self.metrics = pickle.load(fs)
-        log('Model Loaded')
 
+        log('Model Loaded')
+        
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     if len(args.gpu.split(',')) > 1:

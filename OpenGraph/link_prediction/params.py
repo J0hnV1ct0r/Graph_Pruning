@@ -41,5 +41,5 @@ def parse_args():
     parser.add_argument('--anchor', default=256, type=int, help='number of anchor nodes in the compressed graph transformer')
     parser.add_argument('--pred_iter', default=1, type=int, help='number of prediction iterations')
     parser.add_argument('--proj_trn_steps', default=10, type=int, help='number of training steps for one initial projection')
-    return parser.parse_args()
+    return parser.parse_args(args=[])
 args = parse_args()
