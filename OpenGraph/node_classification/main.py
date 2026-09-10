@@ -1,10 +1,10 @@
 import torch as t
 from torch import nn
-import Utils.TimeLogger as logger
-from Utils.TimeLogger import log
-from params import args
-from model import OpenGraph, ALRS
-from data_handler import DataHandler, MultiDataHandler
+import node_classification.Utils.TimeLogger as logger
+from node_classification.Utils.TimeLogger import log
+from node_classification.params import args
+from node_classification.model import OpenGraph, ALRS
+from node_classification.data_handler import DataHandler, MultiDataHandler
 import numpy as np
 import pickle
 import os
@@ -162,7 +162,7 @@ class Exp:
             model_path = os.path.abspath(
                 os.path.join(
                     base_dir,
-                    '..',
+                    '.',
                     'Models',
                     args.load_model + '.mod'
                 )
@@ -171,7 +171,7 @@ class Exp:
             history_path = os.path.abspath(
                 os.path.join(
                     base_dir,
-                    '..',
+                    '.',
                     'History',
                     args.load_model + '.his'
                 )
