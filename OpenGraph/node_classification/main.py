@@ -162,7 +162,7 @@ class Exp:
             model_path = os.path.abspath(
                 os.path.join(
                     base_dir,
-                    '.',
+                    '..',
                     'Models',
                     args.load_model + '.mod'
                 )
@@ -171,7 +171,7 @@ class Exp:
             history_path = os.path.abspath(
                 os.path.join(
                     base_dir,
-                    '.',
+                    '..',
                     'History',
                     args.load_model + '.his'
                 )
