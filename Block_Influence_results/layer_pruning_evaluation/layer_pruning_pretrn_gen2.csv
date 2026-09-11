@@ -1,0 +1,10 @@
+Configuração,Camadas Removidas,Camadas Restantes,Redução Parâmetros (%),Dataset,Acc_mean,Acc_std,F1_mean,F1_std
+Baseline,Nenhuma,"0,1,2,3",0.0,cora,0.7567999999999999,0.0048744230427815805,0.748169899672026,0.004861954189170654
+Tier 1,[3],"[0, 1, 2]","{'Total Params Original': 25190400, 'Total Params Pruned': 18892800, 'Params Removed': 6297600, 'Total Sparsity (%)': 25.0}",cora,0.7595,0.003528455752875473,0.7525411928041049,0.003233028165164526
+Tier 2,"[3, 2]","[0, 1]","{'Total Params Original': 25190400, 'Total Params Pruned': 12595200, 'Params Removed': 12595200, 'Total Sparsity (%)': 50.0}",cora,0.7573000000000001,0.0047127486671792755,0.748122074998902,0.003674563964273825
+Baseline,Nenhuma,"0,1,2,3",0.0,pubmed,0.6877,0.05515985859300219,0.6635357870861399,0.04753655684493331
+Tier 1,[3],"[0, 1, 2]","{'Total Params Original': 25190400, 'Total Params Pruned': 18892800, 'Params Removed': 6297600, 'Total Sparsity (%)': 25.0}",pubmed,0.6905,0.035322089405922734,0.6627450073716296,0.03344803809019842
+Tier 2,"[3, 2]","[0, 1]","{'Total Params Original': 25190400, 'Total Params Pruned': 12595200, 'Params Removed': 12595200, 'Total Sparsity (%)': 50.0}",pubmed,0.699,0.022750824160895786,0.6662723919535043,0.021517821324514255
+Baseline,Nenhuma,"0,1,2,3",0.0,citeseer,0.5627000000000001,0.015427572718998896,0.5295609207908658,0.015487823529767988
+Tier 1,[3],"[0, 1, 2]","{'Total Params Original': 25190400, 'Total Params Pruned': 18892800, 'Params Removed': 6297600, 'Total Sparsity (%)': 25.0}",citeseer,0.5857999999999999,0.01351147660324364,0.5496495589482403,0.013569810277417615
+Tier 2,"[3, 2]","[0, 1]","{'Total Params Original': 25190400, 'Total Params Pruned': 12595200, 'Params Removed': 12595200, 'Total Sparsity (%)': 50.0}",citeseer,0.5976000000000001,0.012249081598226057,0.5605386701769621,0.012317513273743749
