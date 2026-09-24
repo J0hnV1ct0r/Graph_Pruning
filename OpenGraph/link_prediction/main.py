@@ -1,10 +1,10 @@
 import torch as t
 from torch import nn
-import Utils.TimeLogger as logger
-from Utils.TimeLogger import log
-from params import args
-from model import OpenGraph, ALRS
-from data_handler import DataHandler, MultiDataHandler
+import link_prediction.Utils.TimeLogger as logger
+from link_prediction.Utils.TimeLogger import log
+from link_prediction.params import args
+from link_prediction.model import OpenGraph, ALRS
+from link_prediction.data_handler import DataHandler, MultiDataHandler
 import numpy as np
 import pickle
 import os

@@ -1,13 +1,13 @@
 import pickle
 import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix, dok_matrix
-from params import args
+from link_prediction.params import args
 import scipy.sparse as sp
-from Utils.TimeLogger import log
+from link_prediction.Utils.TimeLogger import log
 import torch as t
 import torch.utils.data as data
 import torch_geometric.transforms as T
-from model import InitialProjector
+from link_prediction.model import InitialProjector
 import os
 
 class MultiDataHandler:

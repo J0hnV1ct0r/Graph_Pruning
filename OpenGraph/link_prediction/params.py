@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--cache_adj', default=0, type=int, help='indicates wheter cache bidirectional adjs')
     parser.add_argument('--cache_proj', default=1, type=int, help='indicates wheter cache projector and matrices')
     parser.add_argument('--epoch_max_step', default=-1, type=int, help='indicates the maximum number of steps in one epoch, -1 denotes full steps')
-    parser.add_argument('--data_dir', default='../datasets', type=str, help='dataset directory')
+    parser.add_argument('--data_dir', default='./datasets', type=str, help='dataset directory')
 
     parser.add_argument('--niter', default=2, type=int, help='number of iteration in svd')
     parser.add_argument('--reg', default=1e-7, type=float, help='weight decay regularizer')

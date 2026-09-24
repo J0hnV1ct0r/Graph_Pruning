@@ -1,9 +1,9 @@
 import torch as t
 from torch import nn
 import torch.nn.functional as F
-from params import args
+from link_prediction.params import args
 import numpy as np
-from Utils.TimeLogger import log
+from link_prediction.Utils.TimeLogger import log
 from torch.nn import MultiheadAttention
 from time import time
 
