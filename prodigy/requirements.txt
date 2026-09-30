@@ -1,0 +1,15 @@
+scikit-learn
+scipy
+sentence-transformers
+torch==2.10.0
+torch-geometric==2.8.0.post1
+tqdm
+traitlets
+transformers
+wandb
+attrdict
+pandas
+numpy
+lmdb
+ogb
+ray

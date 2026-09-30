@@ -2,6 +2,7 @@
 .venv/
 venv/
 env/
+.venv_prodigy/*
 
 # Datasets e Modelos pesados
 AnyGraph/Datasets/*
@@ -22,3 +23,5 @@ __pycache__/
 
 results/
 Global_pruining_results/
+
+prodigy/data/datasets/*
