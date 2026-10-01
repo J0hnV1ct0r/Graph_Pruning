@@ -1228,8 +1228,18 @@ class SubgraphFewshotDatasetWithTextFeats(SubgraphFewshotDataset):
             self.text_dict = pickle.load(open(text_dict_path, "rb"))
         if os.path.exists(cache_filename):
             print("Loading text features from ", cache_filename)
-            texts, embeddings = torch.load(cache_filename)
-            text_to_emb = {text: emb for text, emb in zip(texts, embeddings)}
+
+            texts, embeddings = torch.load(
+                cache_filename,
+                mmap=True,
+                weights_only=False
+            )
+
+            text_to_emb = {
+                text: emb
+                for text, emb in zip(texts, embeddings)
+            }
+
             return text_to_emb
         print("Preprocessing text features for {}....".format(self.dataset))
         bert = SentenceTransformer(model_name, cache_folder=os.path.join(self.root, "sbert"), device=self.device)
