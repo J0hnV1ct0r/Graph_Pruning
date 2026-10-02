@@ -1,0 +1,21 @@
+dataset,estrategia,k_max_99,k_max_95,retido_k3
+tolokers-2,BI todos os tokens,0,0,64.29819309962471
+tolokers-2,BI token-alvo,0,0,84.50132131177372
+tolokers-2,Ablação individual (val),0,1,83.47877567661597
+tolokers-2,Aleatória (mediana),0,0,52.967766482042194
+cora,BI todos os tokens,0,0,43.165001181669396
+cora,BI token-alvo,0,0,62.78613864623791
+cora,Ablação individual (val),0,0,43.165001181669396
+cora,Aleatória (mediana),0,0,-37.57062146892656
+pubmed,BI todos os tokens,0,0,71.75461392767477
+pubmed,BI token-alvo,0,0,58.359937746846974
+pubmed,Ablação individual (val),0,0,55.901657637023014
+pubmed,Aleatória (mediana),0,0,-10.66666666666666
+city-roads-M,BI todos os tokens,0,0,86.87414425209909
+city-roads-M,BI token-alvo,0,0,86.87414425209909
+city-roads-M,Ablação individual (val),0,0,80.32831105340601
+city-roads-M,Aleatória (mediana),0,0,58.07467671779323
+artnet-views,BI todos os tokens,0,1,84.838728805245
+artnet-views,BI token-alvo,0,0,84.838728805245
+artnet-views,Ablação individual (val),0,1,76.0740548071662
+artnet-views,Aleatória (mediana),0,0,57.5390299335822
