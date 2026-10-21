@@ -1,0 +1,31 @@
+Checkpoint,Dataset,Repetição,Configuração,Expert,Acurácia,F1-Score,tstNum
+pretrain_link2,arxiv,0,Modelo Inteiro (Baseline),2,0.6051478303808406,0.4010573085103535,48603
+pretrain_link2,arxiv,0,"Poda Tier 1 (Sem [5, 6])",2,0.5967532868341461,0.41342371085552027,48603
+pretrain_link2,arxiv,0,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.42892414048515526,0.31441066947448854,48603
+pretrain_link2,arxiv,1,Modelo Inteiro (Baseline),7,0.6320803242598193,0.3867170408799455,48603
+pretrain_link2,arxiv,1,"Poda Tier 1 (Sem [5, 6])",7,0.6605765076229863,0.46893424384421023,48603
+pretrain_link2,arxiv,1,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.5337119107874,0.3529859679452653,48603
+pretrain_link2,arxiv,2,Modelo Inteiro (Baseline),7,0.646421002818756,0.38616870148017196,48603
+pretrain_link2,arxiv,2,"Poda Tier 1 (Sem [5, 6])",7,0.6641565335473119,0.4638236557382789,48603
+pretrain_link2,arxiv,2,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.56486225130136,0.365704297285807,48603
+pretrain_link2,arxiv,3,Modelo Inteiro (Baseline),7,0.625270045058947,0.3637743071393027,48603
+pretrain_link2,arxiv,3,"Poda Tier 1 (Sem [5, 6])",7,0.6609674299940332,0.46781300798920783,48603
+pretrain_link2,arxiv,3,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.5213052692220644,0.33397927512698633,48603
+pretrain_link2,arxiv,4,Modelo Inteiro (Baseline),7,0.6406806164228546,0.3820842979608817,48603
+pretrain_link2,arxiv,4,"Poda Tier 1 (Sem [5, 6])",7,0.6693208238174598,0.4747685550963013,48603
+pretrain_link2,arxiv,4,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.4633870337221982,0.34688112661494364,48603
+pretrain_link2,arxiv,5,Modelo Inteiro (Baseline),7,0.6395284241713475,0.38899517163552433,48603
+pretrain_link2,arxiv,5,"Poda Tier 1 (Sem [5, 6])",7,0.6580457996419974,0.4605236925071464,48603
+pretrain_link2,arxiv,5,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.5933584346645269,0.36550001210467425,48603
+pretrain_link2,arxiv,6,Modelo Inteiro (Baseline),7,0.6152912371664301,0.3733198613618627,48603
+pretrain_link2,arxiv,6,"Poda Tier 1 (Sem [5, 6])",7,0.6600621360821348,0.45845975851404697,48603
+pretrain_link2,arxiv,6,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.545974528321297,0.34047117875085553,48603
+pretrain_link2,arxiv,7,Modelo Inteiro (Baseline),7,0.6267308602349649,0.37358284062026825,48603
+pretrain_link2,arxiv,7,"Poda Tier 1 (Sem [5, 6])",7,0.6625722692014896,0.4699927479111361,48603
+pretrain_link2,arxiv,7,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.5283624467625455,0.35660297761012794,48603
+pretrain_link2,arxiv,8,Modelo Inteiro (Baseline),7,0.6328210192786453,0.38358115401142073,48603
+pretrain_link2,arxiv,8,"Poda Tier 1 (Sem [5, 6])",7,0.6604324835915478,0.4642472155988731,48603
+pretrain_link2,arxiv,8,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.48875583811698864,0.3249741198420703,48603
+pretrain_link2,arxiv,9,Modelo Inteiro (Baseline),7,0.6381499084418657,0.38605906853762484,48603
+pretrain_link2,arxiv,9,"Poda Tier 1 (Sem [5, 6])",7,0.6611937534720079,0.46577014510057674,48603
+pretrain_link2,arxiv,9,"Poda Tier 2 (Sem [4, 5, 6, 7])",2,0.5285064707939839,0.35613042718569016,48603
