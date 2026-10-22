@@ -1,0 +1,2 @@
+Configuração,Accuracy média,Accuracy desvio padrão,F1 macro médio,F1 macro desvio padrão,Accuracy global,F1 macro global,Batches avaliados,Exemplos avaliados
+Baseline,0.8788888888888889,0.14512234089608841,0.8672281866281867,0.16271375758038045,0.8788888888888889,0.8788667743721109,500,4500

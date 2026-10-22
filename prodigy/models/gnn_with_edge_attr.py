@@ -129,51 +129,71 @@ class BipartiteGAT(MessagePassing, MetagraphLayer):
 
 
 
-class SAGEConvSelfLoops(MessagePassing):
+
+class SAGEConvSelfLoopsV2(MessagePassing):
     """
-    Extension of SAGE aggregation to incorporate edge information by concatenation.
+    Extension of SAGE aggregation to incorporate edge information.
     Self-loops are accounted for with a different projection.
-
-    Args:
-        emb_dim (int): dimensionality of embeddings for nodes and edges.
-        embed_input (bool): whether to embed input or not.
-
-    See https://arxiv.org/abs/1810.00826
     """
 
-    def __init__(self, x_dim, edge_attr_dim, emb_dim, dropout = 0, aggr="add", transform_x=True, batch_norm=True):
-        super(SAGEConvSelfLoops, self).__init__()
-        # multi-layer perceptron
+    def __init__(
+        self,
+        x_dim,
+        edge_attr_dim,
+        emb_dim,
+        dropout=0,
+        aggr="add",
+        transform_x=True,
+        batch_norm=True
+    ):
+        super(SAGEConvSelfLoopsV2, self).__init__(aggr=aggr)
+
         self.transform_x = transform_x
         self.lin_x = torch.nn.Linear(x_dim, emb_dim)
+
         if transform_x:
             self.lin_self_loops = torch.nn.Linear(x_dim, emb_dim)
+
         if edge_attr_dim is None:
-            #  do not use edge_attr
             self.lin_edge_attr = None
         else:
-            self.lin_edge_attr = torch.nn.Linear(edge_attr_dim, emb_dim)
-        self.mlp = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2 * emb_dim), torch.nn.ReLU(),
-                                       torch.nn.Linear(2 * emb_dim, emb_dim))
-        self.aggr = aggr
+            self.lin_edge_attr = torch.nn.Linear(
+                edge_attr_dim, emb_dim
+            )
 
+        self.mlp = torch.nn.Sequential(
+            torch.nn.Linear(emb_dim, 2 * emb_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(2 * emb_dim, emb_dim)
+        )
+
+        self.aggr = aggr
         self.dropout = torch.nn.Dropout(dropout)
+
         self.bn = torch.nn.Identity()
         if batch_norm:
             self.bn = torch.nn.BatchNorm1d(emb_dim)
 
     def forward(self, x, edge_index, edge_attr=None):
         x_transformed = self.lin_x(x)
+
         if self.lin_edge_attr is None:
-            x_msg = self.propagate(aggr=self.aggr, edge_index=edge_index, x=x_transformed)
+            edge_attr_emb = None
         else:
             edge_attr_emb = self.lin_edge_attr(edge_attr)
-            x_msg = self.propagate(aggr=self.aggr, edge_index=edge_index, x=x_transformed, edge_attr=edge_attr_emb)
+
+        x_msg = self.propagate(
+            edge_index=edge_index,
+            x=x_transformed,
+            edge_attr=edge_attr_emb
+        )
+
         if self.transform_x:
             x_msg += self.lin_self_loops(x)
-        
+
         if x.shape[1] == x_msg.shape[1]:
             x_msg = self.dropout(x_msg) + x
+
         x_msg = self.bn(x_msg)
 
         return x_msg
@@ -310,7 +330,7 @@ class GNNWithSupernodePooling(torch.nn.Module, BackgroundGNNLayer):
 gnn_models = {
     "gin": GINConv,
     "no_msg_passing": NoMessagePassing,
-    "sage": SAGEConvSelfLoops,
+    "sage": SAGEConvSelfLoopsV2,
     "molecule_sage": SimpleMoleculeGNN,
     "gat": GATv2Conv
 }

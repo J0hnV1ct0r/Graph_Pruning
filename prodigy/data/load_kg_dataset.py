@@ -106,7 +106,7 @@ def ssp_multigraph_to_g(graph, cache=None):
     """
     if cache and os.path.exists(cache):
         print("Use cache from: ", cache)
-        g = torch.load(cache)
+        g = torch.load(cache, weights_only=False)
         return g, g.edge_attr.max() + 1, g.num_nodes
 
     edge_list = [[], []]
