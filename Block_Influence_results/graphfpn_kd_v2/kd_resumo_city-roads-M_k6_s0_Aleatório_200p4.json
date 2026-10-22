@@ -1,0 +1,35 @@
+{
+ "dataset": "city-roads-M",
+ "task": "regression",
+ "metric": "R\u00b2",
+ "seed": 0,
+ "prune_k": 6,
+ "student": "Aleat\u00f3rio",
+ "camadas": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params": 10345933,
+ "params_teacher": 20090701,
+ "lr": 0.001,
+ "sweep": {
+  "0.0001": 0.6727368831634521,
+  "0.0003": 0.7151923775672913,
+  "0.001": 0.6690974235534668
+ },
+ "t_poda": 0.0,
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 90,
+ "melhor_passo": 50,
+ "metric_val_melhor": -4.303455352783203e-05,
+ "teacher_test_ens": 0.6489430665969849,
+ "test_ens_antes": -0.3154447078704834,
+ "test_ens_ultimo": -0.0013822317123413086,
+ "test_ens_melhor": -0.0002351999282836914,
+ "retomado_nos_passos": []
+}
