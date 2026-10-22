@@ -1,0 +1,44 @@
+{
+ "dataset": "tolokers-2",
+ "task": "binclass",
+ "metric": "AP",
+ "teacher_metric_test": 0.6098373672614602,
+ "teacher_metric_test_ens": 0.6094244790343545,
+ "params_teacher": 20090701,
+ "metric_test_ens_antes_Podado": 0.34502838316429896,
+ "metric_test_ens_depois_Podado": 0.5858604659680168,
+ "lr_Podado": 0.0001,
+ "t_poda_Podado": 1.9287505149841309,
+ "camadas_Podado": [
+  0,
+  5,
+  6,
+  8,
+  9,
+  11
+ ],
+ "params_Podado": 10345933,
+ "sweep_Podado": {
+  "0.0001": 0.1373339742422104,
+  "0.0003": 0.3093107342720032,
+  "0.001": 0.3101375997066498
+ },
+ "metric_test_ens_antes_Aleat\u00f3rio": 0.2728825339148479,
+ "metric_test_ens_depois_Aleat\u00f3rio": 0.30404657783791794,
+ "lr_Aleat\u00f3rio": 0.0001,
+ "t_poda_Aleat\u00f3rio": 0.0,
+ "camadas_Aleat\u00f3rio": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params_Aleat\u00f3rio": 10345933,
+ "sweep_Aleat\u00f3rio": {
+  "0.0001": 0.294628381729126,
+  "0.0003": 0.3146296441555023,
+  "0.001": 0.312802791595459
+ }
+}
