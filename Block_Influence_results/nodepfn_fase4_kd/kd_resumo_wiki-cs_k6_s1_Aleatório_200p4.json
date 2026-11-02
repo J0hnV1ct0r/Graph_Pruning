@@ -1,0 +1,34 @@
+{
+ "dataset": "wiki-cs",
+ "task": "multiclass",
+ "metric": "Acur\u00e1cia",
+ "seed": 1,
+ "prune_k": 6,
+ "student": "Aleat\u00f3rio",
+ "camadas": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params": 14803476,
+ "params_teacher": 29008404,
+ "lr": 0.0001,
+ "sweep": {
+  "0.0001": 1.9429645538330078,
+  "0.0003": 2.4684951305389404,
+  "0.001": 2.7279789447784424
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 50,
+ "melhor_passo": 10,
+ "metric_val_melhor": 0.4495726495726496,
+ "teacher_test_ens": 0.7860271338532208,
+ "test_ens_antes": 0.05725883986753552,
+ "test_ens_ultimo": 0.17466082683473988,
+ "test_ens_melhor": 0.12584125627603887,
+ "retomado_nos_passos": []
+}

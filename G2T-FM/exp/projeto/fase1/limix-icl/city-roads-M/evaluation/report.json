@@ -1,0 +1,428 @@
+{
+    "function": "bin.evaluate.main",
+    "commit": "2974a28b17f0ddeb4ebc1c3a50ae93f99bb1c954",
+    "gpus": [
+        "NVIDIA GeForce RTX 5060 Ti"
+    ],
+    "config": {
+        "function": "bin.g2t.g2t_fm.main",
+        "n_seeds": 3,
+        "base_config": {
+            "patience": 16,
+            "amp": true,
+            "n_epochs": 0,
+            "epoch_size": 10,
+            "min_train_ratio": 0.75,
+            "seq_len_pred": 1024,
+            "finetune_mode": "full",
+            "tfm": {
+                "name": "limix"
+            },
+            "ensemble": {
+                "shuffle_features": true,
+                "shuffle_targets": false,
+                "n_members": 10
+            },
+            "encodings": {
+                "lappe": {
+                    "k": 14
+                },
+                "degree": {
+                    "log": true
+                },
+                "pagerank": {
+                    "log": true
+                }
+            },
+            "nfa": {},
+            "data": {
+                "cache": false,
+                "path": "data/city-roads-M",
+                "setting": "transductive",
+                "internal_split_name": "RL"
+            },
+            "transform": {
+                "labels": true,
+                "features": {
+                    "seed": 0,
+                    "cat_policy": "ordinal",
+                    "num_policy": "quantile-normal",
+                    "frac_policy": "quantile-uniform"
+                },
+                "encodings": {
+                    "num_policy": "quantile-normal"
+                },
+                "nfa": {
+                    "seed": 0,
+                    "cat_policy": "ordinal",
+                    "num_policy": "quantile-normal",
+                    "frac_policy": "quantile-uniform"
+                }
+            },
+            "optimizer": {
+                "type": "AdamW",
+                "lr": 0.0003,
+                "weight_decay": 0.0
+            },
+            "pearl": {
+                "batch_size": 8,
+                "d_output": 16,
+                "backbone": {
+                    "type": "BaseGraphBackbone",
+                    "conv_name": "gcn",
+                    "norm_name": "none",
+                    "residual": false,
+                    "n_layers": 3,
+                    "d_hidden": 512,
+                    "dropout": 0.1,
+                    "activation": "gelu"
+                }
+            }
+        }
+    },
+    "reports": [
+        {
+            "function": "bin.g2t.g2t_fm.main",
+            "commit": "2974a28b17f0ddeb4ebc1c3a50ae93f99bb1c954",
+            "gpus": [
+                "NVIDIA GeForce RTX 5060 Ti"
+            ],
+            "config": {
+                "seed": 0,
+                "patience": 16,
+                "amp": true,
+                "n_epochs": 0,
+                "epoch_size": 10,
+                "min_train_ratio": 0.75,
+                "seq_len_pred": 1024,
+                "finetune_mode": "full",
+                "tfm": {
+                    "name": "limix"
+                },
+                "ensemble": {
+                    "shuffle_features": true,
+                    "shuffle_targets": false,
+                    "n_members": 10
+                },
+                "encodings": {
+                    "lappe": {
+                        "k": 14
+                    },
+                    "degree": {
+                        "log": true
+                    },
+                    "pagerank": {
+                        "log": true
+                    }
+                },
+                "nfa": {},
+                "data": {
+                    "cache": false,
+                    "path": "data/city-roads-M",
+                    "setting": "transductive",
+                    "internal_split_name": "RL"
+                },
+                "transform": {
+                    "labels": true,
+                    "features": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    },
+                    "encodings": {
+                        "num_policy": "quantile-normal"
+                    },
+                    "nfa": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    }
+                },
+                "optimizer": {
+                    "type": "AdamW",
+                    "lr": 0.0003,
+                    "weight_decay": 0.0
+                },
+                "pearl": {
+                    "batch_size": 8,
+                    "d_output": 16,
+                    "backbone": {
+                        "type": "BaseGraphBackbone",
+                        "conv_name": "gcn",
+                        "norm_name": "none",
+                        "residual": false,
+                        "n_layers": 3,
+                        "d_hidden": 512,
+                        "dropout": 0.1,
+                        "activation": "gelu"
+                    }
+                }
+            },
+            "dataset_time": "142.8043858880119",
+            "n_parameters": 18636893,
+            "prediction_type": "labels",
+            "metrics": {
+                "train": {
+                    "rmse": 1.2641389859026642,
+                    "mae": 0.9302572011947632,
+                    "r2": 0.9145175218582153,
+                    "score": 0.9145175218582153
+                },
+                "val": {
+                    "rmse": 2.5177686573314912,
+                    "mae": 1.8652420043945312,
+                    "r2": 0.6563162803649902,
+                    "score": 0.6563162803649902
+                },
+                "test": {
+                    "rmse": 2.561747184518827,
+                    "mae": 1.9021685123443604,
+                    "r2": 0.6512643098831177,
+                    "score": 0.6512643098831177
+                }
+            },
+            "train": {
+                "metrics": {
+                    "val": {
+                        "score": -Infinity
+                    }
+                }
+            },
+            "inference_time": "132.25404102200991",
+            "eval_batch_size": 32768,
+            "max_memory_allocated_bytes": 14617478656,
+            "time": 275.821592311986
+        },
+        {
+            "function": "bin.g2t.g2t_fm.main",
+            "commit": "2974a28b17f0ddeb4ebc1c3a50ae93f99bb1c954",
+            "gpus": [
+                "NVIDIA GeForce RTX 5060 Ti"
+            ],
+            "config": {
+                "seed": 1,
+                "patience": 16,
+                "amp": true,
+                "n_epochs": 0,
+                "epoch_size": 10,
+                "min_train_ratio": 0.75,
+                "seq_len_pred": 1024,
+                "finetune_mode": "full",
+                "tfm": {
+                    "name": "limix"
+                },
+                "ensemble": {
+                    "shuffle_features": true,
+                    "shuffle_targets": false,
+                    "n_members": 10
+                },
+                "encodings": {
+                    "lappe": {
+                        "k": 14
+                    },
+                    "degree": {
+                        "log": true
+                    },
+                    "pagerank": {
+                        "log": true
+                    }
+                },
+                "nfa": {},
+                "data": {
+                    "cache": false,
+                    "path": "data/city-roads-M",
+                    "setting": "transductive",
+                    "internal_split_name": "RL"
+                },
+                "transform": {
+                    "labels": true,
+                    "features": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    },
+                    "encodings": {
+                        "num_policy": "quantile-normal"
+                    },
+                    "nfa": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    }
+                },
+                "optimizer": {
+                    "type": "AdamW",
+                    "lr": 0.0003,
+                    "weight_decay": 0.0
+                },
+                "pearl": {
+                    "batch_size": 8,
+                    "d_output": 16,
+                    "backbone": {
+                        "type": "BaseGraphBackbone",
+                        "conv_name": "gcn",
+                        "norm_name": "none",
+                        "residual": false,
+                        "n_layers": 3,
+                        "d_hidden": 512,
+                        "dropout": 0.1,
+                        "activation": "gelu"
+                    }
+                }
+            },
+            "dataset_time": "213.3248957649921",
+            "n_parameters": 18636893,
+            "prediction_type": "labels",
+            "metrics": {
+                "train": {
+                    "rmse": 1.291952234920581,
+                    "mae": 0.9550637602806091,
+                    "r2": 0.9107146263122559,
+                    "score": 0.9107146263122559
+                },
+                "val": {
+                    "rmse": 2.5174808646178506,
+                    "mae": 1.8665419816970825,
+                    "r2": 0.6563948392868042,
+                    "score": 0.6563948392868042
+                },
+                "test": {
+                    "rmse": 2.5625008373724336,
+                    "mae": 1.9026408195495605,
+                    "r2": 0.6510591506958008,
+                    "score": 0.6510591506958008
+                }
+            },
+            "train": {
+                "metrics": {
+                    "val": {
+                        "score": -Infinity
+                    }
+                }
+            },
+            "inference_time": "126.85837615799392",
+            "eval_batch_size": 32768,
+            "max_memory_allocated_bytes": 14617941504,
+            "time": 341.6232230089954
+        },
+        {
+            "function": "bin.g2t.g2t_fm.main",
+            "commit": "2974a28b17f0ddeb4ebc1c3a50ae93f99bb1c954",
+            "gpus": [
+                "NVIDIA GeForce RTX 5060 Ti"
+            ],
+            "config": {
+                "seed": 2,
+                "patience": 16,
+                "amp": true,
+                "n_epochs": 0,
+                "epoch_size": 10,
+                "min_train_ratio": 0.75,
+                "seq_len_pred": 1024,
+                "finetune_mode": "full",
+                "tfm": {
+                    "name": "limix"
+                },
+                "ensemble": {
+                    "shuffle_features": true,
+                    "shuffle_targets": false,
+                    "n_members": 10
+                },
+                "encodings": {
+                    "lappe": {
+                        "k": 14
+                    },
+                    "degree": {
+                        "log": true
+                    },
+                    "pagerank": {
+                        "log": true
+                    }
+                },
+                "nfa": {},
+                "data": {
+                    "cache": false,
+                    "path": "data/city-roads-M",
+                    "setting": "transductive",
+                    "internal_split_name": "RL"
+                },
+                "transform": {
+                    "labels": true,
+                    "features": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    },
+                    "encodings": {
+                        "num_policy": "quantile-normal"
+                    },
+                    "nfa": {
+                        "seed": 0,
+                        "cat_policy": "ordinal",
+                        "num_policy": "quantile-normal",
+                        "frac_policy": "quantile-uniform"
+                    }
+                },
+                "optimizer": {
+                    "type": "AdamW",
+                    "lr": 0.0003,
+                    "weight_decay": 0.0
+                },
+                "pearl": {
+                    "batch_size": 8,
+                    "d_output": 16,
+                    "backbone": {
+                        "type": "BaseGraphBackbone",
+                        "conv_name": "gcn",
+                        "norm_name": "none",
+                        "residual": false,
+                        "n_layers": 3,
+                        "d_hidden": 512,
+                        "dropout": 0.1,
+                        "activation": "gelu"
+                    }
+                }
+            },
+            "dataset_time": "184.10418073702022",
+            "n_parameters": 18636893,
+            "prediction_type": "labels",
+            "metrics": {
+                "train": {
+                    "rmse": 1.3091232367308547,
+                    "mae": 0.9683487415313721,
+                    "r2": 0.9083254933357239,
+                    "score": 0.9083254933357239
+                },
+                "val": {
+                    "rmse": 2.520535716833865,
+                    "mae": 1.8690876960754395,
+                    "r2": 0.6555604338645935,
+                    "score": 0.6555604338645935
+                },
+                "test": {
+                    "rmse": 2.564072754332072,
+                    "mae": 1.9034039974212646,
+                    "r2": 0.6506308913230896,
+                    "score": 0.6506308913230896
+                }
+            },
+            "train": {
+                "metrics": {
+                    "val": {
+                        "score": -Infinity
+                    }
+                }
+            },
+            "inference_time": "125.19441392901354",
+            "eval_batch_size": 32768,
+            "max_memory_allocated_bytes": 14617941504,
+            "time": 310.34309683798347
+        }
+    ],
+    "time": 928.919085853995
+}

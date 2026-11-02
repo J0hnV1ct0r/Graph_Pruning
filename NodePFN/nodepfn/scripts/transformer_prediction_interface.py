@@ -213,7 +213,8 @@ class NodePFNClassifier(BaseEstimator, ClassifierMixin):
         """
         if self.no_grad:
             # Check that X and y have correct shape
-            X, y = check_X_y(X, y, force_all_finite=False)
+            # Portabilidade para scikit-learn >= 1.8: force_all_finite foi renomeado para ensure_all_finite
+            X, y = check_X_y(X, y, ensure_all_finite=False)
         # Store the classes seen during fit
         y = self._validate_targets(y)
         self.label_encoder = LabelEncoder()
@@ -249,7 +250,7 @@ class NodePFNClassifier(BaseEstimator, ClassifierMixin):
 
         # Input validation
         if self.no_grad:
-            X = check_array(X, force_all_finite=False)
+            X = check_array(X, ensure_all_finite=False)
             X_full = np.concatenate([self.X_, X], axis=0)
             X_full = torch.tensor(X_full, device=self.device).float().unsqueeze(1)
         else:
