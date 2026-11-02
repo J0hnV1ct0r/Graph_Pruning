@@ -1,0 +1,34 @@
+{
+ "dataset": "wiki-cs",
+ "task": "multiclass",
+ "metric": "Acur\u00e1cia",
+ "seed": 0,
+ "prune_k": 6,
+ "student": "Podado",
+ "camadas": [
+  0,
+  5,
+  6,
+  8,
+  9,
+  11
+ ],
+ "params": 8563789,
+ "params_teacher": 16526413,
+ "lr": 0.0001,
+ "sweep": {
+  "0.0001": 3.3312759399414062,
+  "0.0003": 3.7408270835876465,
+  "0.001": 4.261639595031738
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 50,
+ "melhor_passo": 10,
+ "metric_val_melhor": 0.252991452991453,
+ "teacher_test_ens": 0.8128405084926824,
+ "test_ens_antes": 0.16707616707616707,
+ "test_ens_ultimo": 0.26321974148061106,
+ "test_ens_melhor": 0.25691699604743085,
+ "retomado_nos_passos": []
+}

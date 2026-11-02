@@ -51,6 +51,8 @@ EVAL_EVERY = 10
 LR_GRID = [1e-4, 3e-4, 1e-3]
 SWEEP_STEPS = 20
 EVAL_BATCH = 2**15
+MAX_CTX = None  # máximo de nós de contexto por passo de treino (None = todo o treino restante, como o oficial)
+TRAIN_CHUNKS = 1  # partes da consulta de treino por passo (acumulação de gradiente; mesmo gradiente, menos memória)
 METRICA = {"binclass": "AP", "multiclass": "Acurácia", "regression": "R²"}
 
 
@@ -208,19 +210,32 @@ def kd_train(student, prof, t, lr, n_steps, prof_raw, label, patience=None, esta
         student.train()
         batch = torch.unique(next(queue))
         ctx = torch.ones(n_train, dtype=torch.bool, device=dev); ctx[batch] = False
+        if MAX_CTX is not None and int(ctx.sum()) > MAX_CTX:
+            # Sorteia MAX_CTX nós de contexto neste passo (professor e student recebem o mesmo contexto).
+            livres = torch.where(ctx)[0]
+            ctx[:] = False
+            ctx[livres[torch.randperm(len(livres), device=dev)[:MAX_CTX]]] = True
         ctx_mask = torch.zeros_like(masks["train"]); ctx_mask[train_idx[ctx]] = True
         q_mask = torch.zeros_like(masks["train"]); q_mask[train_idx[batch]] = True
         _, member = t["ens"].sample_member()
         y_ctx = t["y_train"][ctx]
-        with torch.no_grad():
-            te = forward(prof, t, member, ctx_mask, y_ctx, q_mask, seed=seed * 100_000 + step)
-        s = forward(student, t, member, ctx_mask, y_ctx, q_mask, seed=seed * 100_000 + step)
-        loss = kd_loss(s, te, t)
+        # Os nós de consulta só atendem ao contexto, então dividir a consulta em partes com o mesmo contexto e somar
+        # os gradientes (ponderados pelo tamanho da parte) dá o mesmo gradiente da consulta inteira.
+        q_idx = torch.where(q_mask)[0]
         opt.zero_grad(set_to_none=True)
-        loss.backward()
+        loss_passo = 0.0
+        for parte in q_idx.tensor_split(TRAIN_CHUNKS):
+            q_parte = torch.zeros_like(q_mask); q_parte[parte] = True
+            with torch.no_grad():
+                te = forward(prof, t, member, ctx_mask, y_ctx, q_parte, seed=seed * 100_000 + step)
+            s = forward(student, t, member, ctx_mask, y_ctx, q_parte, seed=seed * 100_000 + step)
+            loss = kd_loss(s, te, t) * (len(parte) / len(q_idx))
+            loss.backward()
+            loss_passo += loss.item()
+            del s, te, loss
         opt.step()
         torch.cuda.synchronize(); t_kd += time.time() - tic
-        losses.append(loss.item())
+        losses.append(loss_passo)
         if not np.isfinite(losses[-1]):
             print(f"  {label}: loss não finita no passo {step}, interrompido", flush=True)
             break
@@ -272,8 +287,14 @@ if __name__ == "__main__":
     ap.add_argument("--out", default="g2t_fase4_kd")
     ap.add_argument("--eval-batch", type=int, default=EVAL_BATCH,
                     help="nós de consulta por forward de avaliação (menor = menos memória; a saída não muda)")
+    ap.add_argument("--max-ctx", type=int, default=None,
+                    help="máximo de nós de contexto por passo de treino, sorteados a cada passo (avaliação usa todo o treino)")
+    ap.add_argument("--train-chunks", type=int, default=TRAIN_CHUNKS,
+                    help="partes da consulta de treino por passo, com acumulação de gradiente (mais = menos memória)")
     a = ap.parse_args()
     EVAL_BATCH = a.eval_batch
+    TRAIN_CHUNKS = a.train_chunks
+    MAX_CTX = a.max_ctx
     lib.init()
     lib.configure_torch()
     dev = torch.device("cuda")
@@ -293,7 +314,7 @@ if __name__ == "__main__":
     print(f"{a.dataset} seed={a.seed}: professor (ensemble 10) = {prof_ens:.4f}", flush=True)
 
     for kind in a.students.split(","):
-        tag = f"{a.dataset}_k{a.prune_k}_s{a.seed}_{kind}_{a.steps}p{a.patience}" + (f"_lr{a.lr:g}" if a.lr else "")
+        tag = f"{a.dataset}_k{a.prune_k}_s{a.seed}_{kind}_{a.steps}p{a.patience}" + (f"_lr{a.lr:g}" if a.lr else "") + (f"_ctx{a.max_ctx}" if a.max_ctx else "")
         out_log, out_sum = out_dir / f"kd_log_{tag}.csv", out_dir / f"kd_resumo_{tag}.json"
         if out_log.exists() and out_sum.exists():
             print(f"(já feito: {tag})", flush=True)
