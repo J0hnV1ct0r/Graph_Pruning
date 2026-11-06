@@ -25,3 +25,6 @@ results/
 Global_pruining_results/
 
 prodigy/data/datasets/*
+# Novos GFMs: checkpoints grandes ficam fora do git
+NodePFN/models_ckpts/nodepfn/*.ckpt
+G2T-FM/checkpoints/LimiX-16M.ckpt

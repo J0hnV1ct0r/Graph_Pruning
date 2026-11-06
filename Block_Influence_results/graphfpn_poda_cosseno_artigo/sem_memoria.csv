@@ -1,0 +1,4 @@
+dataset,n_nodes,n_features,n_edges
+city-reviews,148801,34,2330830
+avazu-ctr,76269,229,21968154
+pubmed,19717,500,88648

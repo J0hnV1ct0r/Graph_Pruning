@@ -1,0 +1,44 @@
+{
+ "dataset": "city-roads-M",
+ "task": "regression",
+ "metric": "R\u00b2",
+ "teacher_metric_test": 0.6408036351203918,
+ "teacher_metric_test_ens": 0.6489430665969849,
+ "params_teacher": 20090701,
+ "metric_test_ens_antes_Podado": 0.4310663938522339,
+ "metric_test_ens_depois_Podado": 0.6236873269081116,
+ "lr_Podado": 0.0001,
+ "t_poda_Podado": 4.886498689651489,
+ "camadas_Podado": [
+  0,
+  5,
+  6,
+  8,
+  9,
+  11
+ ],
+ "params_Podado": 10345933,
+ "sweep_Podado": {
+  "0.0001": 0.14043974876403809,
+  "0.0003": 0.26613694429397583,
+  "0.001": 0.6621350646018982
+ },
+ "metric_test_ens_antes_Aleat\u00f3rio": -0.3154447078704834,
+ "metric_test_ens_depois_Aleat\u00f3rio": -0.0007873773574829102,
+ "lr_Aleat\u00f3rio": 0.001,
+ "t_poda_Aleat\u00f3rio": 0.0,
+ "camadas_Aleat\u00f3rio": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params_Aleat\u00f3rio": 10345933,
+ "sweep_Aleat\u00f3rio": {
+  "0.0001": 0.6727486848831177,
+  "0.0003": 0.7150189876556396,
+  "0.001": 0.6691586971282959
+ }
+}
