@@ -349,25 +349,49 @@
     "student": "Aleat\u00f3rio",
     "origem": "tolokers-2",
     "alvo": "city-roads-M",
-    "n": 2,
-    "sem": -34.21954144721323,
-    "com": -58.28754884781658
+    "n": 3,
+    "sem": -23.889295487240943,
+    "com": -39.10333592008089
    },
    {
     "student": "Aleat\u00f3rio",
     "origem": "tolokers-2",
     "alvo": "tolokers-2",
-    "n": 2,
-    "sem": 10.310728254643324,
-    "com": 14.754357324907744
+    "n": 3,
+    "sem": 5.666034448990267,
+    "com": 14.69861234896029
    },
    {
     "student": "Aleat\u00f3rio",
     "origem": "tolokers-2",
     "alvo": "wiki-cs",
-    "n": 2,
-    "sem": -13.33768438208845,
-    "com": -34.294749416877295
+    "n": 3,
+    "sem": -17.98347694875484,
+    "com": -31.707670769713232
+   },
+   {
+    "student": "Podado",
+    "origem": "city-roads-M",
+    "alvo": "city-roads-M",
+    "n": 3,
+    "sem": 65.5452670052283,
+    "com": 96.25487080544451
+   },
+   {
+    "student": "Podado",
+    "origem": "city-roads-M",
+    "alvo": "tolokers-2",
+    "n": 3,
+    "sem": 32.20625748596506,
+    "com": 68.66996245885196
+   },
+   {
+    "student": "Podado",
+    "origem": "city-roads-M",
+    "alvo": "wiki-cs",
+    "n": 3,
+    "sem": 1.4947493098628488,
+    "com": 40.14255990662996
    },
    {
     "student": "Podado",
@@ -542,6 +566,38 @@
   ],
   "NodePFN": [
    {
+    "student": "Aleat\u00f3rio",
+    "origem": "tolokers-2",
+    "alvo": "tolokers-2",
+    "n": 3,
+    "sem": 5.729993091191698,
+    "com": 75.58946672620785
+   },
+   {
+    "student": "Aleat\u00f3rio",
+    "origem": "tolokers-2",
+    "alvo": "wiki-cs",
+    "n": 3,
+    "sem": -21.815007596726947,
+    "com": -32.67209755368307
+   },
+   {
+    "student": "Aleat\u00f3rio",
+    "origem": "wiki-cs",
+    "alvo": "tolokers-2",
+    "n": 3,
+    "sem": 5.7300232814551215,
+    "com": 40.846626539643395
+   },
+   {
+    "student": "Aleat\u00f3rio",
+    "origem": "wiki-cs",
+    "alvo": "wiki-cs",
+    "n": 3,
+    "sem": -21.815007596726947,
+    "com": -18.451022126960854
+   },
+   {
     "student": "Podado",
     "origem": "tolokers-2",
     "alvo": "tolokers-2",
@@ -571,7 +627,7 @@
     "alvo": "wiki-cs",
     "n": 3,
     "sem": 77.9211658600442,
-    "com": 99.2883949419715
+    "com": 99.28839494197153
    }
   ],
   "Ephris": [
