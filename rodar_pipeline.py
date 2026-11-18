@@ -61,7 +61,8 @@ KD_LR = None                      # None = varredura em {1e-4, 3e-4, 1e-3}; ou u
 # Transferência entre datasets (EXP-013)
 TRANSFERIR_PODA = True            # na fase 2: poda cada dataset com a ordem de BI medida em outro dataset
 TRANSFERIR_KD = True              # na fase 4: avalia cada student, sem treinar, nos outros datasets
-# Datasets da transferência. Por padrão, os informativos (o amazon-ratings fica perto do acaso em todos os modelos).
+# Datasets da transferência (só os que também estão em DATASETS). Por padrão, os informativos (o amazon-ratings fica
+# perto do acaso em todos os modelos).
 TRANSF_DATASETS = ["tolokers-2", "wiki-cs", "city-roads-M"]
 # A transferência do KD não treina de novo: avalia os students salvos pela fase 4 (pasta <modelo>_fase4_kd) ou, se lá
 # não houver, os da rodada do EXP-013 (pasta <modelo>_kd_transfer), feita quando a fase 4 ainda não salvava os students.
@@ -208,7 +209,7 @@ def montar_comandos():
         fase2_e_3("fase2")
         if TRANSFERIR_PODA:  # precisa do BI de todos os datasets; a ordem própria e as aleatórias vêm da fase 3
             for m in MODELOS:
-                dss = datasets_de(m, TRANSF_DATASETS)
+                dss = datasets_de(m, [d for d in TRANSF_DATASETS if d in DATASETS])
                 if len(dss) < 2:
                     continue
                 if m == "ephris":
@@ -231,7 +232,7 @@ def montar_comandos():
                     add(f"kd_{m}_{d}_s{seed}", cmd_kd(m, d, seed, KD_STUDENTS, KD_LR, salvar=True))
         if TRANSFERIR_KD:  # avalia os students salvos acima, sem treinar de novo
             for m in MODELOS:
-                dss = datasets_de(m, TRANSF_DATASETS)
+                dss = datasets_de(m, [d for d in TRANSF_DATASETS if d in DATASETS])
                 if len(dss) < 2:
                     continue
                 pasta = pasta_students(m)
