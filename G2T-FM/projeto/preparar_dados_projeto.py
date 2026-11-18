@@ -44,7 +44,13 @@ link(DATA / "amazon-ratings" / "amazon_ratings", PYG / "amazon_ratings")
 link(DATA / "wiki-cs" / "raw", PYG / "wiki-cs" / "raw")
 link(DATA / "wiki-cs" / "processed", PYG / "wiki-cs" / "processed")
 
-for name, n in [("amazon-ratings", 24492), ("wiki-cs", 11701)]:
-    masks = random_split(n)
+# Datasets leves planejados (18/11): o próprio G2T-FM baixa os dados do PyG em data/<dataset>/ na primeira execução;
+# aqui só os splits. Semente do split: 1 no minesweeper (com a semente 0 o teste fica sem positivos), 0 nos demais.
+SEMENTE_SPLIT = {"minesweeper": 1}
+
+for name, n in [("amazon-ratings", 24492), ("wiki-cs", 11701), ("minesweeper", 10000), ("amazon-photo", 7650),
+                ("amazon-computers", 13752), ("cora", 2708), ("citeseer", 3327)]:
+    (DATA / name).mkdir(parents=True, exist_ok=True)
+    masks = random_split(n, SEMENTE_SPLIT.get(name, 0))
     np.savez(DATA / name / "split.npz", **masks)
     print(name, {k: int(v.sum()) for k, v in masks.items()})

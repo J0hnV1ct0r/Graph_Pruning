@@ -172,16 +172,22 @@ def load_classic(name):
         x = TruncatedSVD(128, random_state=0).fit_transform(X).astype(np.float32)
         src, dst, y = e["id_1"].values, e["id_2"].values, t["target"].values
     else:
-        from torch_geometric.datasets import HeterophilousGraphDataset, WikiCS, Planetoid
+        from torch_geometric.datasets import Amazon, HeterophilousGraphDataset, WikiCS, Planetoid
         g = {"amazon-ratings": lambda: HeterophilousGraphDataset(PYG_ROOT, "amazon-ratings"),
+             "minesweeper": lambda: HeterophilousGraphDataset(PYG_ROOT, "minesweeper"),
+             "amazon-photo": lambda: Amazon(PYG_ROOT, "Photo"),
+             "amazon-computers": lambda: Amazon(PYG_ROOT, "Computers"),
+             "cora": lambda: Planetoid(PYG_ROOT, "Cora"),
+             "citeseer": lambda: Planetoid(PYG_ROOT, "CiteSeer"),
              "questions": lambda: HeterophilousGraphDataset(PYG_ROOT, "questions"),
              "wiki-cs": lambda: WikiCS(PYG_ROOT / "wiki-cs", is_undirected=True),
              "pubmed": lambda: Planetoid(PYG_ROOT, "PubMed")}[name]()[0]
         x, y, n = g.x.numpy().astype(np.float32), g.y.numpy(), g.num_nodes
         src, dst = g.edge_index.numpy()
     return GraphDataset(name=name, graph=dgl.graph((src, dst), num_nodes=n, idtype=torch.int32),
-                        features={"other": x}, targets=y.astype(np.float32), masks=random_split(n),
-                        task_type="binclass" if name == "questions" else "multiclass")
+                        features={"other": x}, targets=y.astype(np.float32),
+                        masks=random_split(n, {"minesweeper": 1}.get(name, 0)),  # ver SEMENTE_SPLIT em fase23_graphpfn.py
+                        task_type="binclass" if name in ("questions", "minesweeper") else "multiclass")
 
 def prepare_task(name, cfg):
     if cfg["source"] == "graphland":
@@ -405,6 +411,12 @@ ALL_DATASETS = {
     "twitch-views": dict(source="graphland"),
     "questions": dict(source="classic", d_pca=64),
     "wiki-cs": dict(source="classic"),
+    # datasets leves planejados (18/11), como em fase23_graphpfn.py
+    "minesweeper": dict(source="classic"),
+    "amazon-photo": dict(source="classic", d_pca=64),
+    "amazon-computers": dict(source="classic", d_pca=64),
+    "cora": dict(source="classic", d_pca=64),
+    "citeseer": dict(source="classic", d_pca=64),
 }
 
 

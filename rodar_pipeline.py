@@ -33,9 +33,24 @@ from pathlib import Path
 # Modelos: "graphpfn", "g2t" (G2T-LimiX), "nodepfn", "ephris"
 MODELOS = ["graphpfn", "g2t", "nodepfn", "ephris"]
 
-# Datasets do protocolo comum. Combinações que um modelo não suporta são puladas (NodePFN e Ephris não fazem regressão,
-# então não rodam no city-roads-M). O Ephris também aceita artnet-exp, city-reviews, questions, facebook e pubmed.
-DATASETS = ["tolokers-2", "wiki-cs", "amazon-ratings", "city-roads-M"]
+# Datasets. Combinações que um modelo não suporta são puladas (NodePFN e Ephris não fazem regressão, então não rodam no
+# city-roads-M). Todos usam o mesmo split nos quatro modelos: o RL do GraphLand (tolokers-2, city-roads-M) ou 10/10/80
+# com semente 0 (semente 1 no minesweeper, cuja semente 0 deixa o teste sem positivos).
+DATASETS_EXECUTADOS = [   # já passaram pelas fases 1–4 nos modelos que os suportam
+    "tolokers-2",          # GraphLand, binário (AP)
+    "wiki-cs",             # 10 classes (acurácia)
+    "amazon-ratings",      # 5 classes; fica perto do acaso em todos os modelos
+    "city-roads-M",        # GraphLand, regressão (R²); só GraphPFN e G2T-LimiX
+]
+DATASETS_PLANEJADOS = [   # mais leves que o city-roads-M; carregadores prontos nos quatro modelos, ainda não executados
+    "minesweeper",         # 10.000 nós, 7 features, binário (AP)
+    "amazon-photo",        # 7.650 nós, 745 features (PCA 64 no GraphPFN e no G2T-LimiX), 8 classes
+    "amazon-computers",    # 13.752 nós, 767 features (PCA 64), 10 classes
+    "cora",                # 2.708 nós, 1.433 features (PCA 64), 7 classes
+    "citeseer",            # 3.327 nós, 3.703 features (PCA 64), 6 classes
+]
+# O Ephris também aceita artnet-exp, city-reviews, questions, facebook e pubmed (já executados só nele).
+DATASETS = DATASETS_EXECUTADOS + DATASETS_PLANEJADOS
 
 # Sementes (as fases 1–3 do Ephris usam sempre 0, 1 e 2, definidas em Ephris/projeto/comum.py)
 SEMENTES = [0, 1, 2]
@@ -63,7 +78,7 @@ TRANSFERIR_PODA = True            # na fase 2: poda cada dataset com a ordem de 
 TRANSFERIR_KD = True              # na fase 4: avalia cada student, sem treinar, nos outros datasets
 # Datasets da transferência (só os que também estão em DATASETS). Por padrão, os informativos (o amazon-ratings fica
 # perto do acaso em todos os modelos).
-TRANSF_DATASETS = ["tolokers-2", "wiki-cs", "city-roads-M"]
+TRANSF_DATASETS = ["tolokers-2", "wiki-cs", "city-roads-M"] + DATASETS_PLANEJADOS
 # A transferência do KD não treina de novo: avalia os students salvos pela fase 4 (pasta <modelo>_fase4_kd) ou, se lá
 # não houver, os da rodada do EXP-013 (pasta <modelo>_kd_transfer), feita quando a fase 4 ainda não salvava os students.
 
@@ -90,12 +105,13 @@ TECTONIC = "~/miniconda3/envs/latex/bin/tectonic"
 RAIZ = Path(__file__).resolve().parent
 R = RAIZ / "Block_Influence_results"
 
+LEVES = {"minesweeper", "amazon-photo", "amazon-computers", "cora", "citeseer"}
 SUPORTE = {  # datasets que cada modelo carrega
-    "graphpfn": {"tolokers-2", "wiki-cs", "amazon-ratings", "city-roads-M"},
-    "g2t": {"tolokers-2", "wiki-cs", "amazon-ratings", "city-roads-M"},
-    "nodepfn": {"tolokers-2", "wiki-cs", "amazon-ratings"},
+    "graphpfn": {"tolokers-2", "wiki-cs", "amazon-ratings", "city-roads-M"} | LEVES,
+    "g2t": {"tolokers-2", "wiki-cs", "amazon-ratings", "city-roads-M"} | LEVES,
+    "nodepfn": {"tolokers-2", "wiki-cs", "amazon-ratings"} | LEVES,
     "ephris": {"tolokers-2", "wiki-cs", "amazon-ratings", "artnet-exp", "city-reviews", "questions", "facebook",
-               "pubmed"},
+               "pubmed"} | LEVES,
 }
 NAO_CABE_KD = {("graphpfn", "wiki-cs")}  # KD não cabe em 16 GB de GPU
 CAMADAS_KD = {"graphpfn": 6, "g2t": 6, "nodepfn": 6, "ephris": 5}  # metade das camadas

@@ -46,6 +46,12 @@ HP = {
     # tolokers-2, o outro dataset binário do GraphLand.
     "questions": dict(smoothing_steps=3, n_components=25, n_ensemble=1, svd_algorithm="randomized"),
     "artnet-exp": dict(smoothing_steps=2, n_components=None, n_ensemble=4, svd_algorithm="randomized"),
+    # datasets leves planejados (18/11), HPs de run.sh (n_ensemble e svd_algorithm nos padrões do script: 32 e arpack)
+    "minesweeper": dict(smoothing_steps=1, n_components=None, n_ensemble=32, svd_algorithm="arpack"),
+    "amazon-photo": dict(smoothing_steps=3, n_components=15, n_ensemble=32, svd_algorithm="arpack"),
+    "amazon-computers": dict(smoothing_steps=3, n_components=15, n_ensemble=32, svd_algorithm="arpack"),
+    "cora": dict(smoothing_steps=4, n_components=15, n_ensemble=32, svd_algorithm="arpack"),
+    "citeseer": dict(smoothing_steps=2, n_components=15, n_ensemble=32, svd_algorithm="arpack"),
 }
 REFERENCIA = {"tolokers-2": 0.4379, "amazon-ratings": 0.4122, "wiki-cs": 0.7810}  # Tabela 11 do GraphPFN
 
@@ -59,9 +65,16 @@ def carregar(name):
         m = pd.read_csv(d / "split_masks_RL.csv", index_col=0)
         masks = {k: m[k].values.astype(bool) for k in ["train", "val", "test"]}
     else:
-        from torch_geometric.datasets import HeterophilousGraphDataset, WikiCS
-        g = (HeterophilousGraphDataset(PYG, name) if name in ("amazon-ratings", "questions")
-             else WikiCS(PYG / "wiki-cs", is_undirected=True))[0]
+        from torch_geometric.datasets import Amazon, HeterophilousGraphDataset, Planetoid, WikiCS
+        g = {"amazon-ratings": lambda: HeterophilousGraphDataset(PYG, "amazon-ratings"),
+             "questions": lambda: HeterophilousGraphDataset(PYG, "questions"),
+             "wiki-cs": lambda: WikiCS(PYG / "wiki-cs", is_undirected=True),
+             "minesweeper": lambda: HeterophilousGraphDataset(PYG, "minesweeper"),
+             "amazon-photo": lambda: Amazon(PYG, "Photo"),
+             "amazon-computers": lambda: Amazon(PYG, "Computers"),
+             "cora": lambda: Planetoid(PYG, "Cora"),
+             "citeseer": lambda: Planetoid(PYG, "CiteSeer"),
+             }[name]()[0]
         x, y, e = g.x.numpy().astype(np.float32), g.y.numpy().astype(np.int64), g.edge_index.numpy()
         masks = dict(np.load(SPLITS / name / "split.npz"))
     return torch.from_numpy(x), y, torch.from_numpy(np.ascontiguousarray(e)).long(), masks

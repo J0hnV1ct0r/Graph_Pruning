@@ -13,10 +13,17 @@ _Atualizado em 18/11/2026._
 Usado para que GraphPFN, G2T-LimiX, NodePFN e Ephris sejam comparáveis entre si (o relatório principal só traz
 análises neste protocolo).
 
-- **Datasets:** tolokers-2, wiki-cs e amazon-ratings nos quatro; city-roads-M no GraphPFN e no G2T-LimiX (NodePFN e
-  Ephris não fazem regressão). amazon-ratings fica perto do acaso em todos e não sustenta conclusões.
+- **Datasets executados:** tolokers-2, wiki-cs e amazon-ratings nos quatro; city-roads-M no GraphPFN e no G2T-LimiX
+  (NodePFN e Ephris não fazem regressão). amazon-ratings fica perto do acaso em todos e não sustenta conclusões.
+- **Datasets planejados** (mais leves que o city-roads-M; carregadores prontos e testados nos quatro modelos, ainda
+  não executados): minesweeper (binário), amazon-photo, amazon-computers, cora e citeseer (multiclasse). Nos de muitas
+  features (todos menos o minesweeper), o GraphPFN e o G2T-LimiX usam PCA de 64 dimensões, como no amazon-ratings; o
+  NodePFN usa os hiperparâmetros do `run.sh` oficial; o GraphPFN mede o modelo inteiro e o BI na própria fase 2
+  (`medir_bi`, que reproduz o protocolo do artigo: mesma métrica e BI com diferença ≤ 1e-16 no tolokers-2).
 - **Splits:** os do artigo do GraphPFN: split RL do GraphLand; 10/10/80 com semente 0 nos clássicos (o mesmo
-  `split.npz` em todos os modelos).
+  `split.npz` em todos os modelos). Exceção: o minesweeper usa a semente 1, porque com a semente 0 todos os 2.000
+  positivos caem no treino e na validação e o teste fica sem positivos (as minas parecem ter sido sorteadas com o
+  mesmo gerador e semente).
 - **Sementes:** 0, 1, 2 (variam o modelo e o treino, não o split).
 - **Métrica:** AP (binária), acurácia (multiclasse), $R^2$ (regressão), reportada como **desempenho retido**:
   `100·(podado − acaso)/(inteiro − acaso)`, pareado por semente.

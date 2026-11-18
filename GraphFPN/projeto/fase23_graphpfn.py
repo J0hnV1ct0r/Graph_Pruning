@@ -62,7 +62,15 @@ ARTIGO = R / "graphfpn_poda_cosseno_artigo"
 DATASETS = {"tolokers-2": dict(source="graphland"), "amazon-ratings": dict(source="classic", d_pca=64),
             "wiki-cs": dict(source="classic"), "city-roads-M": dict(source="graphland"),
             # transferência entre datasets (2026-11): mesmos d_pca do protocolo do artigo
-            "artnet-exp": dict(source="graphland"), "questions": dict(source="classic", d_pca=64)}
+            "artnet-exp": dict(source="graphland"), "questions": dict(source="classic", d_pca=64),
+            # datasets leves planejados (18/11): PCA de 64 dimensões nos de muitas features, como amazon-ratings e questions
+            "minesweeper": dict(source="classic"), "amazon-photo": dict(source="classic", d_pca=64),
+            "amazon-computers": dict(source="classic", d_pca=64), "cora": dict(source="classic", d_pca=64),
+            "citeseer": dict(source="classic", d_pca=64)}
+# Semente do split 10/10/80 por dataset (padrão 0). No minesweeper, a semente 0 põe todos os 2.000 positivos no
+# treino e na validação (as minas parecem ter sido sorteadas com o mesmo gerador e semente) e o teste fica sem
+# positivos; por isso ele usa a semente 1, igual em todos os modelos.
+SEMENTE_SPLIT = {"minesweeper": 1}
 PRIMARY = {"binclass": "average_precision", "multiclass": "accuracy", "regression": "r2"}
 N_MEMBERS, N_LAYERS, AMP = 10, 12, True
 CHUNK_BUDGET = 2**26
@@ -158,15 +166,21 @@ def random_split(n, seed=0):
 
 
 def load_classic(name):
-    from torch_geometric.datasets import HeterophilousGraphDataset, WikiCS
+    from torch_geometric.datasets import Amazon, HeterophilousGraphDataset, Planetoid, WikiCS
     g = {"amazon-ratings": lambda: HeterophilousGraphDataset(PYG_ROOT, "amazon-ratings"),
+         "minesweeper": lambda: HeterophilousGraphDataset(PYG_ROOT, "minesweeper"),
+         "amazon-photo": lambda: Amazon(PYG_ROOT, "Photo"),
+         "amazon-computers": lambda: Amazon(PYG_ROOT, "Computers"),
+         "cora": lambda: Planetoid(PYG_ROOT, "Cora"),
+         "citeseer": lambda: Planetoid(PYG_ROOT, "CiteSeer"),
          "questions": lambda: HeterophilousGraphDataset(PYG_ROOT, "questions"),
          "wiki-cs": lambda: WikiCS(PYG_ROOT / "wiki-cs", is_undirected=True)}[name]()[0]
     x, y, n = g.x.numpy().astype(np.float32), g.y.numpy(), g.num_nodes
     src, dst = g.edge_index.numpy()
     return GraphDataset(name=name, graph=dgl.graph((src, dst), num_nodes=n, idtype=torch.int32),
-                        features={"other": x}, targets=y.astype(np.float32), masks=random_split(n),
-                        task_type="binclass" if name == "questions" else "multiclass")
+                        features={"other": x}, targets=y.astype(np.float32),
+                        masks=random_split(n, SEMENTE_SPLIT.get(name, 0)),
+                        task_type="binclass" if name in ("questions", "minesweeper") else "multiclass")
 
 
 def prepare_task(name):
@@ -218,6 +232,45 @@ def avaliar(base, t, seed, remove=()):
     return tuple(out)
 
 
+def bi_reduce(h_in, h_out, eval_pos, chunk=4096):
+    """Cópia de poda_cosseno_artigo_graphpfn.ipynb: somas de 1 − cos sobre todos os tokens e sobre o token-alvo
+    (último token) dos nós de consulta (os nós depois do contexto)."""
+    a, b = h_in[0], h_out[0]
+    s_all = n_all = s_tgt = n_tgt = 0.0
+    for s in range(0, a.shape[0], chunk):
+        cos = F.cosine_similarity(a[s:s + chunk].float(), b[s:s + chunk].float(), dim=-1).clamp(-1, 1)
+        s_all += (1 - cos).sum().item(); n_all += cos.numel()
+        is_test = torch.arange(s, s + cos.shape[0], device=cos.device) >= eval_pos
+        ct = cos[is_test, -1]
+        s_tgt += (1 - ct).sum().item(); n_tgt += ct.numel()
+    return np.array([s_all, n_all, s_tgt, n_tgt])
+
+
+@torch.no_grad()
+def medir_bi(base, t, seed):
+    """(val, test, {camada: {cos_all, cos_tgt}}) com o modelo inteiro: o mesmo forward de avaliar(), com ganchos nas
+    camadas, como em predict(collect_bi=True) do notebook. Usado nos datasets que não estão no protocolo do artigo."""
+    torch.manual_seed(seed)
+    model = GraphPFN(base, n_members=N_MEMBERS, n_features=t["features"].shape[1], n_classes=t["ds"].n_classes,
+                     device=DEVICE, verbose=False).eval()
+    acc, eval_pos = {}, int(t["train_mask"].sum())
+    hooks = [layer.register_forward_hook(
+        lambda m, a, kw, out, i=i: acc.__setitem__(i, acc.get(i, 0) + bi_reduce(a[0], out[0], eval_pos)),
+        with_kwargs=True) for i, layer in enumerate(base.tfm.module.transformer_encoder.layers)]
+    try:
+        preds = apply_model(model=model, dataset=t["ds"], graph=t["graph"], features=t["features"],
+                            y_train=t["y_train"], train_mask=t["train_mask"],
+                            regression_target_stats=t["stats"], amp=AMP, device=DEVICE)
+    finally:
+        for h in hooks:
+            h.remove()
+    out = []
+    for split in ["val", "test"]:
+        m = t["ds"].masks[split]
+        out.append(compute_metrics(y_true=t["ds"].targets[m], y_pred=preds[m], task_type=t["task"])[t["metric"]])
+    return out[0], out[1], {i: {"cos_all": v[0] / v[1], "cos_tgt": v[2] / max(v[3], 1)} for i, v in acc.items()}
+
+
 def chave_artigo(conj):
     return str(sorted(int(i) for i in conj))
 
@@ -235,13 +288,29 @@ def fase2(name, seeds):
     out.mkdir(parents=True, exist_ok=True)
     t = prepare_task(name)
     conhecidas = avaliacoes_artigo(name, t["metric"])
-    # baseline e BI: reaproveitados do notebook (mesmo pipeline e sementes)
-    base_rows = [dict(dataset=name, seed=s, val=v, test=te) for s, (v, te) in sorted(conhecidas["[]"].items()) if s in seeds]
-    pd.DataFrame(base_rows).to_csv(out / "baseline.csv", index=False)
-    bi = pd.read_csv(ARTIGO / "block_influence.csv")
-    bi[(bi.dataset == name) & bi.seed.isin(seeds)].to_csv(out / "block_influence.csv", index=False)
-    print(f"{name}: baseline/BI reaproveitados do protocolo do artigo; teste = "
-          f"{np.mean([r['test'] for r in base_rows]):.4f}", flush=True)
+    if "[]" in conhecidas:
+        # baseline e BI: reaproveitados do notebook (mesmo pipeline e sementes)
+        base_rows = [dict(dataset=name, seed=s, val=v, test=te) for s, (v, te) in sorted(conhecidas["[]"].items())
+                     if s in seeds]
+        pd.DataFrame(base_rows).to_csv(out / "baseline.csv", index=False)
+        bi = pd.read_csv(ARTIGO / "block_influence.csv")
+        bi[(bi.dataset == name) & bi.seed.isin(seeds)].to_csv(out / "block_influence.csv", index=False)
+        origem = "reaproveitados do protocolo do artigo"
+    else:
+        # dataset fora do protocolo do artigo: baseline e BI medidos aqui, no mesmo forward
+        if not (out / "block_influence.csv").exists():
+            base = load_base()
+            base_rows, bi_rows = [], []
+            for seed in seeds:
+                val, test, bi = medir_bi(base, t, seed)
+                base_rows.append(dict(dataset=name, seed=seed, val=val, test=test))
+                bi_rows += [dict(dataset=name, seed=seed, layer=i, **v) for i, v in sorted(bi.items())]
+                print(f"{name} seed={seed}: inteiro val={val:.4f} test={test:.4f}", flush=True)
+            pd.DataFrame(base_rows).to_csv(out / "baseline.csv", index=False)
+            pd.DataFrame(bi_rows).to_csv(out / "block_influence.csv", index=False)
+        base_rows = pd.read_csv(out / "baseline.csv").to_dict("records")
+        origem = "medidos neste script"
+    print(f"{name}: baseline/BI {origem}; teste = {np.mean([r['test'] for r in base_rows]):.4f}", flush=True)
     caminho = out / "ablacao_individual.csv"
     feitos = pd.read_csv(caminho) if caminho.exists() else pd.DataFrame(columns=["dataset", "seed", "removida", "val", "test"])
     base = load_base()

@@ -71,7 +71,8 @@ conda create -n latex -c conda-forge tectonic -y
 
 **Dados:**
 
-- **wiki-cs e amazon-ratings** (PyG): baixados automaticamente em `~/.cache/pyg_data/` na primeira execução.
+- **wiki-cs, amazon-ratings, minesweeper, amazon-photo, amazon-computers, cora e citeseer** (PyG): baixados
+  automaticamente na primeira execução (em `~/.cache/pyg_data/`; o G2T-LimiX baixa a sua cópia em `G2T-FM/data/`).
 - **tolokers-2 e city-roads-M** (benchmark GraphLand, arXiv:2409.14500): precisam estar em
   `~/.cache/graphland/<dataset>/<dataset>/raw/<dataset>/`, com `edgelist.csv`, `features.csv`, `info.yaml`,
   `split_masks_RL.csv` e `targets.csv`.
@@ -85,11 +86,11 @@ Abra o `rodar_pipeline.py` e edite as variáveis da seção `CONFIGURAÇÃO`:
 | Variável | O que define | Padrão |
 |---|---|---|
 | `MODELOS` | `"graphpfn"`, `"g2t"`, `"nodepfn"`, `"ephris"` | os quatro |
-| `DATASETS` | datasets das fases (combinações que um modelo não suporta são puladas) | tolokers-2, wiki-cs, amazon-ratings, city-roads-M |
+| `DATASETS_EXECUTADOS`, `DATASETS_PLANEJADOS`, `DATASETS` | datasets já executados (tolokers-2, wiki-cs, amazon-ratings, city-roads-M), planejados (minesweeper, amazon-photo, amazon-computers, cora, citeseer) e os que vão rodar (combinações que um modelo não suporta são puladas) | `DATASETS` = executados + planejados |
 | `SEMENTES` | sementes | 0, 1, 2 |
 | `ETAPAS` | liga/desliga cada etapa (`preparar_dados`, `fase1`…`fase4_kd`, `custo`, `resumos`, `relatorios`) | todas |
 | `KD_STUDENTS`, `KD_PASSOS`, `KD_PACIENCIA`, `KD_LR` | KD da fase 4 | podado e aleatório, 200, 4, varredura |
-| `TRANSFERIR_PODA`, `TRANSFERIR_KD`, `TRANSF_DATASETS` | transferência entre datasets (fases 2 e 4) | ligadas; tolokers-2, wiki-cs, city-roads-M |
+| `TRANSFERIR_PODA`, `TRANSFERIR_KD`, `TRANSF_DATASETS` | transferência entre datasets (fases 2 e 4) | ligadas; tolokers-2, wiki-cs, city-roads-M e os planejados |
 | `SIMULAR` | `True` só mostra os comandos | `True` |
 | `SOBRESCREVER` | `False` pula etapas que não retomam e já estão feitas | `False` |
 | `PARAR_NA_FALHA` | interromper na primeira falha | `False` |

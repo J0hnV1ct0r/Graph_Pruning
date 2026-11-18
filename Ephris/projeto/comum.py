@@ -34,9 +34,15 @@ GRAPHLAND = Path.home() / ".cache" / "graphland"
 PYG = Path.home() / ".cache" / "pyg_data"
 
 GRAPHLAND_DS = ["tolokers-2", "artnet-exp", "city-reviews"]
-CLASSIC_DS = ["amazon-ratings", "wiki-cs", "questions", "facebook", "pubmed"]
+CLASSIC_DS = ["amazon-ratings", "wiki-cs", "questions", "facebook", "pubmed",
+              # datasets leves planejados (18/11)
+              "minesweeper", "amazon-photo", "amazon-computers", "cora", "citeseer"]
 DATASETS = GRAPHLAND_DS + CLASSIC_DS
-BINARIOS = {"tolokers-2", "artnet-exp", "city-reviews", "questions"}  # métrica AP; demais: acurácia
+BINARIOS = {"tolokers-2", "artnet-exp", "city-reviews", "questions", "minesweeper"}  # métrica AP; demais: acurácia
+# Semente do split 10/10/80 por dataset (padrão 0). No minesweeper, a semente 0 põe todos os 2.000 positivos no
+# treino e na validação (as minas parecem ter sido sorteadas com o mesmo gerador e semente) e o teste fica sem
+# positivos; por isso ele usa a semente 1, igual em todos os modelos.
+SEMENTE_SPLIT = {"minesweeper": 1}
 SEEDS = [0, 1, 2]
 
 
@@ -94,13 +100,18 @@ def _classico(name):
         ei = np.stack([e["id_1"].values, e["id_2"].values]).astype(np.int64)
         y = t["target"].values.astype(np.int64)
     else:
-        from torch_geometric.datasets import HeterophilousGraphDataset, Planetoid, WikiCS
+        from torch_geometric.datasets import Amazon, HeterophilousGraphDataset, Planetoid, WikiCS
         g = {"amazon-ratings": lambda: HeterophilousGraphDataset(PYG, "amazon-ratings"),
+             "minesweeper": lambda: HeterophilousGraphDataset(PYG, "minesweeper"),
+             "amazon-photo": lambda: Amazon(PYG, "Photo"),
+             "amazon-computers": lambda: Amazon(PYG, "Computers"),
+             "cora": lambda: Planetoid(PYG, "Cora"),
+             "citeseer": lambda: Planetoid(PYG, "CiteSeer"),
              "questions": lambda: HeterophilousGraphDataset(PYG, "questions"),
              "wiki-cs": lambda: WikiCS(PYG / "wiki-cs", is_undirected=True),
              "pubmed": lambda: Planetoid(PYG, "PubMed")}[name]()[0]
         x, y, ei, n = g.x.numpy().astype(np.float32), g.y.numpy().astype(np.int64), g.edge_index.numpy(), g.num_nodes
-    return x, y, ei, random_split(len(y))
+    return x, y, ei, random_split(len(y), SEMENTE_SPLIT.get(name, 0))
 
 
 def carregar(name):

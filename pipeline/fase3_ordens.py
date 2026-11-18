@@ -15,7 +15,10 @@ import pandas as pd
 
 R = Path(__file__).resolve().parents[1] / "Block_Influence_results"
 ACASO = {"tolokers-2": 0.218, "amazon-ratings": 0.369, "wiki-cs": 0.230, "city-roads-M": 0.0,  # tabela do EXP-003
-         "questions": 0.030, "artnet-exp": 0.100}  # fração de positivos no teste (transferência, 2026-11)
+         "questions": 0.030, "artnet-exp": 0.100,  # fração de positivos no teste (transferência, 2026-11)
+         # datasets leves planejados (18/11): fração de positivos (minesweeper) ou classe majoritária no teste do split
+         # 10/10/80 (semente 1 no minesweeper, 0 nos demais)
+         "minesweeper": 0.202, "amazon-photo": 0.254, "amazon-computers": 0.378, "cora": 0.300, "citeseer": 0.215}
 KS = range(1, 7)
 N_ALEATORIAS = 3
 
