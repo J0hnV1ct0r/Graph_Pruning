@@ -4,7 +4,7 @@ Custo da poda no GraphPFN, medido como em custo_g2t.py e custo_nodepfn.py (o EXP
 do artigo (ensemble de 10, inferência em blocos), k = 0, 2, 4, 6 pela ordem bi_todos (camada 0 protegida);
 parâmetros, latência (mediana de 3 depois de 1 aquecimento; inclui pré-processamento e carga dos dados) e pico de GPU.
 
-Uso (da raiz do repositório): python GraphFPN/custo_graphpfn.py
+Uso (da raiz do repositório): python GraphFPN/projeto/custo_graphpfn.py
 Saída: Block_Influence_results/custo_pfns/graphpfn.csv
 """
 import sys

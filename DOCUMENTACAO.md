@@ -12,15 +12,15 @@ _Atualizado em 18/11/2026._
 
 Tudo está no branch `main`, na raiz do repositório:
 
-- uma pasta por modelo (`AnyGraph/`, `GraphFPN/`, `G2T-FM/`, `NodePFN/`, `Ephris/`), com o código do modelo e os
-  scripts do projeto (no Ephris, em `Ephris/projeto/`);
-- scripts comuns na raiz (`fase3_ordens.py`, `transferencia_poda.py`, `kd_transferencia.py`, `resumo_*.py`,
-  `rodar_com_vigia.py`);
+- uma pasta por modelo (`AnyGraph/`, `GraphFPN/`, `G2T-FM/`, `NodePFN/`, `Ephris/`), com o código oficial do modelo
+  e, em `<Modelo>/projeto/`, os scripts do projeto;
+- scripts comuns a vários modelos em `pipeline/`;
 - resultados em `Block_Influence_results/`, uma pasta por modelo e fase;
 - relatórios em `Relatorio/`.
 
 Ficam fora do git: checkpoints dos modelos, datasets, o cache de dados do Ephris e os students salvos do KD
-(`student_*.pt`, vários GB).
+(`student_*.pt`, vários GB). Tudo roda da raiz do repositório. Convenções de pastas e nomes, e como trazer ou
+acrescentar código e resultados: [`docs/padroes.md`](docs/padroes.md).
 
 **Resultados parciais (18/11/2026):** a parte 2 da transferência entre datasets ainda roda numa cópia de trabalho
 separada (`.claude/worktrees/fase1-novos-gfms/`, branch `worktree-fase1-novos-gfms`); os resultados dela são copiados
@@ -52,4 +52,5 @@ pins originais de PyTorch não rodam na RTX 5060 Ti.
 | Documento | Conteúdo |
 |---|---|
 | [`docs/pipeline_atual.md`](docs/pipeline_atual.md) | protocolo comum dos PFNs (fases 1–4 e custo), transferência entre datasets, como rodar cada fase, relatórios atuais, estado e próximos passos |
+| [`docs/padroes.md`](docs/padroes.md) | estrutura das pastas, nomes de scripts e de resultados, como acrescentar datasets ou modelos e como trazer o restante da cópia de trabalho separada |
 | [`docs/pipeline_antiga.md`](docs/pipeline_antiga.md) | pipeline anterior: Block Influence e poda por Tiers no AnyGraph, análise do GraphPFN em splits Planetoid e a versão completa anterior do relatório |

@@ -18,10 +18,10 @@ pubmed, tech). As mesmas camadas são removidas em todos os experts.
 |---|---|---|
 | BI cosseno e angular por expert e camada | `Notebooks_block_influence/block_influence.ipynb` | `cosseno/`, `angular/`, `comparacao_angular_x_cosseno/` |
 | Poda Tier 1 (camadas 5 e 6) e Tier 2 (4–7), 1 repetição | `Notebooks_pruning/evaluate_layer_pruning.ipynb` | `layer_pruning_evaluation/` |
-| Mesma poda, 10 repetições pareadas e recarga corrigida | `Notebooks_pruning/evaluate_layer_pruning_repetido.py --checkpoint <ckpt> --dataset <ds>` (da raiz, conda `graph_pruning`) | `layer_pruning_evaluation_repetido/` |
+| Mesma poda, 10 repetições pareadas e recarga corrigida | `AnyGraph/projeto/evaluate_layer_pruning_repetido.py --checkpoint <ckpt> --dataset <ds>` (da raiz, conda `graph_pruning`) | `layer_pruning_evaluation_repetido/` |
 | Poda de camadas pelo BI | `AnyGraph/Pruning_Methods/layer_pruner.py` (`BlockInfluenceLayerPruner`) | — |
 
-Dados e checkpoints: `python download_assets.py --all` (Hugging Face). Os rankings de cosseno e angular são
+Dados e checkpoints: `python AnyGraph/projeto/download_assets.py --all` (Hugging Face). Os rankings de cosseno e angular são
 idênticos; as camadas 4–7 são as de menor BI em todos os experts.
 
 ## 2. GraphPFN: análise em splits Planetoid (`main`, `GraphFPN/`, conda `graphpfn`)
@@ -40,7 +40,7 @@ city-roads-M e artnet-views, e 1 membro de ensemble. Não é comparável com os 
 
 **O que continua sendo usado na pipeline atual:** o modelo inteiro, o BI e as avaliações de
 `graphfpn_poda_cosseno_artigo/` (mesmo pipeline e sementes do protocolo comum) são reaproveitados por
-`GraphFPN/fase23_graphpfn.py`; e o KD atual do GraphPFN é o `GraphFPN/kd_v2_graphpfn.py`, versão 2 do notebook de KD
+`GraphFPN/projeto/fase23_graphpfn.py`; e o KD atual do GraphPFN é o `GraphFPN/projeto/kd_v2_graphpfn.py`, versão 2 do notebook de KD
 (melhor ponto pela validação e parada antecipada).
 
 ## 3. Relatório

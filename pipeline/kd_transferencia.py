@@ -10,10 +10,10 @@ com o ensemble completo do pipeline de cada modelo (o mesmo de test_ens_melhor n
   - student: pesos destilados na origem.
 Students podado e aleatório (todos os student_*.pt da pasta).
 
-Uso (da raiz do worktree, no ambiente de cada modelo):
-    ~/venvs/g2tfm/bin/python             kd_transferencia.py --modelo g2t
-    ~/venvs/nodepfn/bin/python           kd_transferencia.py --modelo nodepfn
-    ~/miniconda3/envs/graphpfn/bin/python kd_transferencia.py --modelo graphpfn
+Uso (da raiz do repositório, no ambiente de cada modelo):
+    ~/venvs/g2tfm/bin/python              pipeline/kd_transferencia.py --modelo g2t
+    ~/venvs/nodepfn/bin/python            pipeline/kd_transferencia.py --modelo nodepfn
+    ~/miniconda3/envs/graphpfn/bin/python pipeline/kd_transferencia.py --modelo graphpfn
 Saída: Block_Influence_results/<pasta do modelo>/transferencia.csv
 """
 import argparse
@@ -22,8 +22,8 @@ import os
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent
-sys.path.insert(0, str(RAIZ))
+RAIZ = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RAIZ / "pipeline"))
 
 import pandas as pd  # noqa: E402
 import torch  # noqa: E402
@@ -45,7 +45,7 @@ def adaptador(modelo):
     """(preparar(alvo, seed) -> t, professor(t), avaliar(m, t) -> métrica no teste, podado(t, prof, manter, seed))."""
     if modelo == "g2t":
         os.chdir(RAIZ / "G2T-FM")
-        sys.path.insert(0, str(RAIZ / "G2T-FM"))
+        sys.path.insert(0, str(RAIZ / "G2T-FM" / "projeto"))
         import fase4_kd as k
         k.lib.init()
         k.lib.configure_torch()
@@ -56,7 +56,7 @@ def adaptador(modelo):
                 lambda t, prof, manter, seed, kind: k.montar(t, pesos=kind == "Podado", manter=manter).eval())
     if modelo == "nodepfn":
         os.chdir(RAIZ / "NodePFN")
-        sys.path.insert(0, str(RAIZ / "NodePFN"))
+        sys.path.insert(0, str(RAIZ / "NodePFN" / "projeto"))
         import avaliar_projeto as ap_
         import fase4_kd as k
 
@@ -68,7 +68,7 @@ def adaptador(modelo):
                 k.avaliar_ensemble,
                 lambda t, prof, manter, seed, kind: k.montar(prof, kind, manter, seed).eval())
     if modelo == "graphpfn":
-        sys.path.insert(0, str(RAIZ / "GraphFPN"))
+        sys.path.insert(0, str(RAIZ / "GraphFPN" / "projeto"))
         import kd_v2_graphpfn as k  # faz chdir para GraphFPN/
 
         def preparar(alvo, seed):

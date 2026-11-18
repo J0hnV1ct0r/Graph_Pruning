@@ -8,10 +8,10 @@ pelo BI medido em outro dataset (ORIGEM). Responde se a ordem de BI é do modelo
 - avaliação no alvo, sem re-treino, sementes 0, 1, 2, com o mesmo pipeline da fase 3 de cada modelo;
 - conjuntos já avaliados na fase 3 (ou na ablação da fase 2) do alvo são reaproveitados (fonte = "fase3").
 
-Uso (da raiz do worktree, no ambiente de cada modelo):
-    ~/miniconda3/envs/graphpfn/bin/python transferencia_poda.py --modelo graphpfn
-    ~/venvs/g2tfm/bin/python             transferencia_poda.py --modelo g2t
-    ~/venvs/nodepfn/bin/python           transferencia_poda.py --modelo nodepfn
+Uso (da raiz do repositório, no ambiente de cada modelo):
+    ~/miniconda3/envs/graphpfn/bin/python pipeline/transferencia_poda.py --modelo graphpfn
+    ~/venvs/g2tfm/bin/python              pipeline/transferencia_poda.py --modelo g2t
+    ~/venvs/nodepfn/bin/python            pipeline/transferencia_poda.py --modelo nodepfn
 Saída: Block_Influence_results/transferencia_poda/<modelo>/avaliacoes.csv
 """
 import argparse
@@ -20,8 +20,8 @@ import os
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent
-sys.path.insert(0, str(RAIZ))
+RAIZ = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RAIZ / "pipeline"))
 
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -54,7 +54,7 @@ def ordens(fase2, ds, com_aleatorias):
 def avaliador(modelo):
     """Retorna avaliar(alvo, seed, conj) -> (val, test) no pipeline da fase 3 do modelo."""
     if modelo == "graphpfn":
-        sys.path.insert(0, str(RAIZ / "GraphFPN"))
+        sys.path.insert(0, str(RAIZ / "GraphFPN" / "projeto"))
         import fase23_graphpfn as g  # faz chdir para GraphFPN/ (checkpoints)
         estado = {}
 
@@ -66,7 +66,7 @@ def avaliador(modelo):
         return avaliar
     if modelo == "g2t":
         os.chdir(RAIZ / "G2T-FM")
-        sys.path.insert(0, str(RAIZ / "G2T-FM"))
+        sys.path.insert(0, str(RAIZ / "G2T-FM" / "projeto"))
         import fase2_bi_ablacao as f2
         f2.lib.init()
         f2.lib.configure_torch()
@@ -77,7 +77,7 @@ def avaliador(modelo):
         return avaliar
     if modelo == "nodepfn":
         os.chdir(RAIZ / "NodePFN")
-        sys.path.insert(0, str(RAIZ / "NodePFN"))
+        sys.path.insert(0, str(RAIZ / "NodePFN" / "projeto"))
         import avaliar_projeto as ap_
         from fase3_poda import removedor
 

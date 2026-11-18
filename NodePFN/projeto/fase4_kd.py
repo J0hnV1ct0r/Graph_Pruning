@@ -17,7 +17,7 @@ Student podado: remove as k camadas de menor BI cosseno de todos os tokens (méd
 protegida). Student aleatório: mesma arquitetura das 12 − k primeiras camadas, com os parâmetros reinicializados
 (reset_parameters de cada módulo + init_weights do TransformerModel, como na construção).
 
-Uso (de dentro de NodePFN/): python fase4_kd.py --dataset tolokers-2 --seed 0 [--prune-k 6] [--students Podado,Aleatório]
+Uso (da raiz do repositório, ~/venvs/nodepfn): python NodePFN/projeto/fase4_kd.py --dataset tolokers-2 --seed 0 [--prune-k 6] [--students Podado,Aleatório]
 Saída: ../Block_Influence_results/nodepfn_fase4_kd/{kd_log,kd_resumo}_<dataset>_k<k>_s<seed>_<student>_<passos>p<pac>.{csv,json}
 """
 import argparse

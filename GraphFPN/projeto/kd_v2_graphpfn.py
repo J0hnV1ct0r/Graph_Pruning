@@ -3,15 +3,14 @@ KD do GraphPFN, versão 2 (student podado × aleatório). Funções copiadas de
 kd_podado_vs_aleatorio_graphpfn.ipynb; o que muda está no fim do arquivo.
 
 Uso (da raiz do repositório):
-    python GraphFPN/kd_v2_graphpfn.py --dataset tolokers-2 --seed 0
+    python GraphFPN/projeto/kd_v2_graphpfn.py --dataset tolokers-2 --seed 0
 """
 import os, sys, json, time, random, warnings
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 from pathlib import Path
 from unittest import mock
 
-cwd = Path.cwd().resolve()
-PROJECT_ROOT = cwd if (cwd / "src" / "graphpfn").exists() else cwd / "GraphFPN"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  # GraphFPN/
 os.chdir(PROJECT_ROOT)
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 warnings.filterwarnings("ignore")

@@ -8,13 +8,14 @@ Roda o pipeline oficial (bin.g2t.g2t_fm.main, ICL, ensemble de 10) com duas inte
 BI medido como em GraphFPN/analise_camadas_e_poda_graphpfn.ipynb: 1 − cos e arccos(cos)/π entre entrada e saída da
 camada, média sobre todos os tokens ("all") e sobre o token-alvo (último token) dos nós de consulta ("tgt").
 
-Uso (de dentro de G2T-FM/):
-    python fase2_bi_ablacao.py --dataset tolokers-2 --modo bi        # baseline + BI, sementes 0 1 2
-    python fase2_bi_ablacao.py --dataset tolokers-2 --modo ablacao   # remove cada camada sozinha, sementes 0 1 2
+Uso (da raiz do repositório, ~/venvs/g2tfm):
+    python G2T-FM/projeto/fase2_bi_ablacao.py --dataset tolokers-2 --modo bi        # baseline + BI, sementes 0 1 2
+    python G2T-FM/projeto/fase2_bi_ablacao.py --dataset tolokers-2 --modo ablacao   # remove cada camada sozinha
 Saída: ../Block_Influence_results/g2t_fase2/<dataset>/{baseline,block_influence,ablacao_individual}.csv
 """
 import argparse
 import copy
+import os
 import shutil
 import sys
 import tempfile
@@ -26,8 +27,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-AQUI = Path(__file__).resolve().parent
+AQUI = Path(__file__).resolve().parents[1]  # G2T-FM/
 sys.path.insert(0, str(AQUI))
+os.chdir(AQUI)  # caminhos de dados das configs são relativos a G2T-FM/
 
 import lib  # noqa: E402
 import bin.g2t.g2t_fm as g2t_fm  # noqa: E402
@@ -92,7 +94,7 @@ def rodar(dataset, seed, remover=(), medir=False):
     config = copy.deepcopy(cfg["base_config"])
     config["seed"] = seed
     ESTADO.update(remover=tuple(remover), medir=medir, acc=None)
-    saida = Path(tempfile.mkdtemp(prefix=f"g2t_{dataset}_", dir="/home/isabelly/.claude/jobs/688befae/tmp"))
+    saida = Path(tempfile.mkdtemp(prefix=f"g2t_{dataset}_"))
     try:
         report = g2t_fm.main(config, saida / "run", force=True)
     finally:

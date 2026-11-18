@@ -1,6 +1,6 @@
 """Resumo da Fase 2 (BI por camada e ablação individual) com o que já estiver pronto em Block_Influence_results/.
 
-Uso (da raiz do repositório): python resumo_fase2.py
+Uso (da raiz do repositório): python pipeline/resumo_fase2.py
 """
 from pathlib import Path
 
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
-R = Path(__file__).resolve().parent / "Block_Influence_results"
+R = Path(__file__).resolve().parents[1] / "Block_Influence_results"
 ACASO = {"tolokers-2": 0.218, "amazon-ratings": 0.369, "wiki-cs": 0.230, "city-roads-M": 0.0}  # tabela do EXP-003
 
 for modelo, pasta in [("GraphPFN", "graphfpn_fase2"), ("G2T-LimiX", "g2t_fase2"), ("NodePFN", "nodepfn_fase2")]:

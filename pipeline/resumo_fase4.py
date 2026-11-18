@@ -4,7 +4,7 @@ Para cada modelo, dataset e student: métrica no teste (ensemble) do professor, 
 no melhor ponto pela validação, média das sementes; "% prof." = 100·student/professor (métrica bruta, como no
 EXP-004 do GraphPFN).
 
-Uso (da raiz do repositório): python resumo_fase4.py
+Uso (da raiz do repositório): python pipeline/resumo_fase4.py
 Saída: Block_Influence_results/{g2t,nodepfn}_fase4_kd/resumo_fase4.csv
 """
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-R = Path(__file__).resolve().parent / "Block_Influence_results"
+R = Path(__file__).resolve().parents[1] / "Block_Influence_results"
 
 for modelo, pasta in [("G2T-LimiX", "g2t_fase4_kd"), ("NodePFN", "nodepfn_fase4_kd")]:
     linhas = [json.loads(f.read_text()) for f in sorted((R / pasta).glob("kd_resumo_*.json"))]

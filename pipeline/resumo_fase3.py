@@ -4,7 +4,7 @@ Para cada modelo, dataset, estratégia e k: métrica bruta no teste e desempenho
 Retido = 100·(podado − acaso)/(inteiro − acaso), pareado por semente (inteiro = baseline.csv da Fase 2).
 As 3 ordens aleatórias aparecem resumidas pela mediana.
 
-Uso (da raiz do repositório): python resumo_fase3.py
+Uso (da raiz do repositório): python pipeline/resumo_fase3.py
 Saída: Block_Influence_results/{g2t,nodepfn}_fase3/<dataset>/curvas_poda.csv e resumo_fase3.csv na raiz de cada pasta.
 """
 import pandas as pd

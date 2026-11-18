@@ -13,10 +13,10 @@ conjunto em que é reportada, os nós de teste de cada dataset são divididos ao
 escolhe a ordem da ablação; metade B ("test") é onde todas as estratégias são reportadas. O teste inteiro também é
 gravado ("full"), comparável ao EXP-002.
 
-Uso (da raiz do worktree; os pesos e dados vêm do repositório principal):
-    python Notebooks_pruning/anygraph_fases.py --checkpoint pretrain_link2 --dataset cora --fase 2
-    python Notebooks_pruning/anygraph_fases.py --checkpoint pretrain_link2 --dataset cora --fase 3
-    python Notebooks_pruning/anygraph_fases.py --checkpoint pretrain_link2 --custo
+Uso (da raiz do repositório):
+    python AnyGraph/projeto/anygraph_fases.py --checkpoint pretrain_link2 --dataset cora --fase 2
+    python AnyGraph/projeto/anygraph_fases.py --checkpoint pretrain_link2 --dataset cora --fase 3
+    python AnyGraph/projeto/anygraph_fases.py --checkpoint pretrain_link2 --custo
 Saída: Block_Influence_results/anygraph_fase{2,3}/<checkpoint>/<dataset>.csv, anygraph_custo/<checkpoint>.csv
 """
 import argparse
@@ -32,9 +32,9 @@ import numpy as np
 import pandas as pd
 import psutil
 
-WT = Path(__file__).resolve().parents[1]
-ANYGRAPH = Path("/home/isabelly/Documentos/Graph_Pruning/AnyGraph")  # pesos (.mod) e Datasets/ ficam só no main
-R = WT / "Block_Influence_results"
+RAIZ = Path(__file__).resolve().parents[2]
+ANYGRAPH = RAIZ / "AnyGraph"  # pesos (.mod) e Datasets/
+R = RAIZ / "Block_Influence_results"
 DATASETS = ["cora", "arxiv", "pubmed", "home", "tech"]
 N_LAYERS = 8
 KS = range(1, 7)

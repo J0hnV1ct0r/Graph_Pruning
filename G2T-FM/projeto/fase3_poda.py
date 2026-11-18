@@ -5,7 +5,7 @@ fase3_ordens.py (BI de todos os tokens, BI do token-alvo, ablação individual e
 Avalia cada conjunto distinto de camadas uma vez por semente, com o mesmo pipeline da Fase 2
 (fase2_bi_ablacao.rodar); conjuntos de 1 camada vêm da ablação da Fase 2.
 
-Uso (de dentro de G2T-FM/): python fase3_poda.py --dataset tolokers-2 [--seeds 0 1 2]
+Uso (da raiz do repositório, ~/venvs/g2tfm): python G2T-FM/projeto/fase3_poda.py --dataset tolokers-2 [--seeds 0 1 2]
 Saída: ../Block_Influence_results/g2t_fase3/<dataset>/{plano,avaliacoes}.csv (grava a cada avaliação e retoma)
 """
 import argparse
@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pandas as pd
 
-AQUI = Path(__file__).resolve().parent
-sys.path.insert(0, str(AQUI.parent))
+AQUI = Path(__file__).resolve().parents[1]  # G2T-FM/
+sys.path.insert(0, str(AQUI.parent / "pipeline"))
 
 import fase2_bi_ablacao as f2  # noqa: E402  (aplica as interceptações do pipeline)
 import fase3_ordens as f3  # noqa: E402

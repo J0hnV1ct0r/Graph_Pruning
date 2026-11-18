@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-R = Path(__file__).resolve().parent / "Block_Influence_results"
+R = Path(__file__).resolve().parents[1] / "Block_Influence_results"
 ACASO = {"tolokers-2": 0.218, "amazon-ratings": 0.369, "wiki-cs": 0.230, "city-roads-M": 0.0,  # tabela do EXP-003
          "questions": 0.030, "artnet-exp": 0.100}  # fração de positivos no teste (transferência, 2026-11)
 KS = range(1, 7)

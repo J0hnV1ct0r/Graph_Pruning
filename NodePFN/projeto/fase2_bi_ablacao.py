@@ -8,7 +8,7 @@ sequência = [tokens globais, estilo, contexto (treino), consulta (validação +
 1 − cos e arccos(cos)/π entre entrada e saída da camada, média sobre todos os tokens ("all") e sobre os tokens dos
 nós de consulta ("tgt", o equivalente ao token-alvo: no NodePFN cada nó é um token e a predição sai deles).
 
-Uso (de dentro de NodePFN/): python fase2_bi_ablacao.py --dataset tolokers-2 [--seeds 0 1 2]
+Uso (da raiz do repositório, ~/venvs/nodepfn): python NodePFN/projeto/fase2_bi_ablacao.py --dataset tolokers-2 [--seeds 0 1 2]
 Saída: ../Block_Influence_results/nodepfn_fase2/<dataset>/{baseline,block_influence,ablacao_individual}.csv
 """
 import argparse

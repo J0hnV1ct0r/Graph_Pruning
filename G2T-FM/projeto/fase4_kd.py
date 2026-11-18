@@ -12,7 +12,7 @@ protegida), como no GraphPFN. Student aleatório: LimiX sem pesos carregados, as
 O PEARL (pesos fixos de checkpoints/pearl_random.pt) é compartilhado e não é treinado; a mesma semente antes de cada
 forward dá ao professor e ao student os mesmos vetores aleatórios do PEARL.
 
-Uso (de dentro de G2T-FM/): python fase4_kd.py --dataset tolokers-2 --seed 0 [--prune-k 6] [--students Podado,Aleatório]
+Uso (da raiz do repositório, ~/venvs/g2tfm): python G2T-FM/projeto/fase4_kd.py --dataset tolokers-2 --seed 0 [--prune-k 6] [--students Podado,Aleatório]
 Saída: ../Block_Influence_results/g2t_fase4_kd/{kd_log,kd_resumo}_<dataset>_k<k>_s<seed>_<student>_<passos>p<pac>.{csv,json}
 """
 import argparse
@@ -25,8 +25,9 @@ import time
 from pathlib import Path
 
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-AQUI = Path(__file__).resolve().parent
+AQUI = Path(__file__).resolve().parents[1]  # G2T-FM/
 sys.path.insert(0, str(AQUI))
+os.chdir(AQUI)  # caminhos de dados das configs são relativos a G2T-FM/
 
 import numpy as np
 import pandas as pd

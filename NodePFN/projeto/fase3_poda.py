@@ -5,7 +5,7 @@ fase3_ordens.py (BI de todos os tokens, BI do token-alvo, ablação individual e
 Mesmo pipeline e hiperparâmetros da Fase 2 (avaliar_projeto.avaliar com os da Fase 1); conjuntos de 1 camada vêm
 da ablação da Fase 2.
 
-Uso (de dentro de NodePFN/): python fase3_poda.py --dataset tolokers-2 [--seeds 0 1 2]
+Uso (da raiz do repositório, ~/venvs/nodepfn): python NodePFN/projeto/fase3_poda.py --dataset tolokers-2 [--seeds 0 1 2]
 Saída: ../Block_Influence_results/nodepfn_fase3/<dataset>/{plano,avaliacoes}.csv (grava a cada avaliação e retoma)
 """
 import argparse
@@ -17,7 +17,7 @@ import torch.nn as nn
 
 import avaliar_projeto as ap_
 
-sys.path.insert(0, str(ap_.AQUI.parent))
+sys.path.insert(0, str(ap_.AQUI.parent / "pipeline"))
 import fase3_ordens as f3  # noqa: E402
 
 RESULTS = ap_.AQUI.parent / "Block_Influence_results" / "nodepfn_fase3"

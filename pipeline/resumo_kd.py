@@ -6,7 +6,7 @@ Fontes: graphfpn_kd_v2/ (GraphPFN), g2t_fase4_kd/ (G2T-LimiX), nodepfn_fase4_kd/
 metade B do teste, acaso por semente). "config" = sufixo do arquivo: 200p4 = protocolo principal (até 200 passos,
 paciência 4); 200p0 / 1000p0 = sensibilidade sem parada antecipada; _ctx900 = contexto de treino limitado.
 
-Uso (da raiz do worktree): python resumo_kd.py
+Uso (da raiz do repositório): python pipeline/resumo_kd.py
 Saída: Block_Influence_results/resumo_kd_todos.csv
 """
 import json

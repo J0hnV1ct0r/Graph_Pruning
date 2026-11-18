@@ -9,7 +9,7 @@ dados e dos splits:
 Hiperparâmetros de inferência por dataset vêm de run.sh (tolokers-2 usa os do tolokers).
 Métrica do artigo: AP (binária) e acurácia (multiclasse). Referência: Tabela 11 do artigo do GraphPFN.
 
-Uso (de dentro de NodePFN/): python avaliar_projeto.py --dataset tolokers-2 --seeds 0 1 2
+Uso (da raiz do repositório, ~/venvs/nodepfn): python NodePFN/projeto/avaliar_projeto.py --dataset tolokers-2 --seeds 0 1 2
 """
 import argparse
 import json
@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-AQUI = Path(__file__).resolve().parent
+AQUI = Path(__file__).resolve().parents[1]  # NodePFN/
 sys.path.insert(0, str(AQUI / "nodepfn"))
 
 from node_classification import fix_seed, update_edge_index  # noqa: E402

@@ -1,4 +1,4 @@
-"""Resumo das Fases 2–3, do custo e do KD do AnyGraph (Notebooks_pruning/anygraph_fases.py e anygraph_kd.py), no
+"""Resumo das Fases 2–3, do custo e do KD do AnyGraph (AnyGraph/projeto/anygraph_fases.py e anygraph_kd.py), no
 formato dos PFNs.
 
 Retido = 100·(média podado − acaso)/(média inteiro − acaso) por dataset, com o baseline da MESMA execução e as mesmas
@@ -7,7 +7,7 @@ mesmos para todas as configurações). Razão das médias, e não média das raz
 inteiro fica perto do acaso e a razão por repetição explode. Reportado na metade B dos nós de teste ("test"); a metade A ("val") só escolhe a ordem da ablação.
 "Média" = média dos 5 datasets; OVERALL = acurácia ponderada pelo nº de nós de teste, como no EXP-002.
 
-Uso (da raiz do worktree): python resumo_anygraph.py
+Uso (da raiz do repositório): python AnyGraph/projeto/resumo_anygraph.py
 Saída: Block_Influence_results/anygraph_fase3/<ckpt>/curvas_poda.csv, resumo_anygraph.csv, resumo_kd_anygraph.csv
 """
 import json
@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
-R = Path(__file__).resolve().parent / "Block_Influence_results"
+R = Path(__file__).resolve().parents[2] / "Block_Influence_results"
 DATASETS = ["cora", "arxiv", "pubmed", "home", "tech"]
 
 

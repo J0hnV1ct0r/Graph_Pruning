@@ -14,7 +14,7 @@ KD do AnyGraph (pretrain_link2, Tier 2 = camadas [4, 5, 6, 7] removidas, −50%)
     pela acurácia na metade A; parada após 4 avaliações sem melhora. Reporta-se a metade B (como em anygraph_fases).
   - Sementes 0, 1, 2 (projetores sorteados com a semente; mesma divisão A/B de anygraph_fases.py).
 
-Uso: python Notebooks_pruning/anygraph_kd.py --dataset cora --seed 0 [--steps 200 --patience 4]
+Uso: python AnyGraph/projeto/anygraph_kd.py --dataset cora --seed 0 [--steps 200 --patience 4]
 Saída: Block_Influence_results/anygraph_kd/kd_<ds>_s<seed>_<student>_<steps>p<patience>.json (+ log .csv)
 """
 import argparse

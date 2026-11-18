@@ -13,8 +13,8 @@ Block_Influence_results/graphfpn_poda_cosseno_artigo/ (origem "artigo"); avalia�
 notebook já tinha feito também são reaproveitadas.
 
 Uso (da raiz do repositório):
-    python GraphFPN/fase23_graphpfn.py --dataset tolokers-2 --fase 2
-    python GraphFPN/fase23_graphpfn.py --dataset tolokers-2 --fase 3
+    python GraphFPN/projeto/fase23_graphpfn.py --dataset tolokers-2 --fase 2
+    python GraphFPN/projeto/fase23_graphpfn.py --dataset tolokers-2 --fase 3
 Saída: Block_Influence_results/graphfpn_fase2/<ds>/{baseline,block_influence,ablacao_individual}.csv
        Block_Influence_results/graphfpn_fase3/<ds>/{plano,avaliacoes}.csv   (grava a cada avaliação e retoma)
 """
@@ -27,11 +27,11 @@ from contextlib import contextmanager
 from pathlib import Path
 
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-AQUI = Path(__file__).resolve().parent
+AQUI = Path(__file__).resolve().parents[1]  # GraphFPN/
 RAIZ = AQUI.parent
 os.chdir(AQUI)  # LimiXWrapper procura ./checkpoints/LimiX-16M.ckpt
 sys.path.insert(0, str(AQUI / "src"))
-sys.path.insert(0, str(RAIZ))
+sys.path.insert(0, str(RAIZ / "pipeline"))
 warnings.filterwarnings("ignore")
 
 import numpy as np  # noqa: E402

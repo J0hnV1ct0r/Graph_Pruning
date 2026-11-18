@@ -3,7 +3,7 @@ Roda um comando e o encerra se a RAM disponível da máquina cair abaixo de um l
 passarem a usar a GPU, para não afetar outros processos (por exemplo, os treinos do quati-ia). Só começa quando há
 RAM suficiente e a GPU está praticamente livre de outros processos.
 
-Uso: python rodar_com_vigia.py [--min-inicio-gb 12] [--limite-gb 8] [--log arquivo] -- comando args...
+Uso: python pipeline/rodar_com_vigia.py [--min-inicio-gb 12] [--limite-gb 8] [--log arquivo] -- comando args...
 Saída: código do comando; 3 se o vigia encerrou.
 """
 import argparse

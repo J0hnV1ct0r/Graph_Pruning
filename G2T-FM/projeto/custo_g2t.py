@@ -4,7 +4,7 @@ tolokers-2, semente 0, pipeline de avaliação completo da Fase 2 (ICL, ensemble
 incluídos), k = 0, 2, 4, 6 camadas removidas pela ordem bi_todos (camada 0 protegida). Para cada k: parâmetros do
 modelo, latência (mediana de 3 execuções depois de 1 de aquecimento) e pico de memória da GPU.
 
-Uso (de dentro de G2T-FM/): python custo_g2t.py
+Uso (da raiz do repositório, ~/venvs/g2tfm): python G2T-FM/projeto/custo_g2t.py
 Saída: ../Block_Influence_results/custo_pfns/g2t.csv
 """
 import sys
@@ -15,8 +15,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-AQUI = Path(__file__).resolve().parent
-sys.path.insert(0, str(AQUI.parent))
+AQUI = Path(__file__).resolve().parents[1]  # G2T-FM/
+sys.path.insert(0, str(AQUI.parent / "pipeline"))
 import fase2_bi_ablacao as f2  # noqa: E402
 import fase3_ordens as f3  # noqa: E402
 

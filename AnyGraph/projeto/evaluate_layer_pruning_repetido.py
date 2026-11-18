@@ -12,8 +12,8 @@ Corrige dois pontos de evaluate_layer_pruning.ipynb (EXP-002):
 Roda um dataset por vez para limitar a memória e para se a RAM disponível cair abaixo do limite.
 
 Uso (da raiz do repositório):
-    python Notebooks_pruning/evaluate_layer_pruning_repetido.py --checkpoint pretrain_link2 --dataset cora
-    python Notebooks_pruning/evaluate_layer_pruning_repetido.py --resumo
+    python AnyGraph/projeto/evaluate_layer_pruning_repetido.py --checkpoint pretrain_link2 --dataset cora
+    python AnyGraph/projeto/evaluate_layer_pruning_repetido.py --resumo
 """
 import argparse
 import os
@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import psutil
 
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT_DIR = os.path.join(REPO_ROOT, "Block_Influence_results", "layer_pruning_evaluation_repetido")
 DATASETS = ["cora", "arxiv", "pubmed", "home", "tech"]
 CONFIGS = {

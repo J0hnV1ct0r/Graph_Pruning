@@ -7,7 +7,7 @@ Monta G2T-FM/data/ para os experimentos do projeto, usando os mesmos dados e spl
   O artigo do G2T-FM usa um split estratificado que não foi publicado; usar o do GraphPFN deixa os modelos
   comparáveis entre si.
 
-Uso (de dentro de G2T-FM/): python preparar_dados_projeto.py
+Uso (da raiz do repositório, ~/venvs/g2tfm): python G2T-FM/projeto/preparar_dados_projeto.py
 """
 from pathlib import Path
 
@@ -15,7 +15,7 @@ import numpy as np
 
 GRAPHLAND = Path.home() / ".cache" / "graphland"
 PYG = Path.home() / ".cache" / "pyg_data"
-DATA = Path(__file__).resolve().parent / "data"
+DATA = Path(__file__).resolve().parents[1] / "data"
 
 
 def random_split(n, seed=0):

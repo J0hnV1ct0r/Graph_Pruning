@@ -1,9 +1,9 @@
 """
 Script utilitário para download dos modelos pré-treinados e datasets do AnyGraph via Hugging Face.
 Uso:
-    python download_assets.py --models      # Baixa os modelos pré-treinados (~9.5 GB)
-    python download_assets.py --datasets    # Baixa os datasets zero-shot (~4 GB)
-    python download_assets.py --all         # Baixa modelos e datasets
+    python AnyGraph/projeto/download_assets.py --models      # Baixa os modelos pré-treinados (~9.5 GB)
+    python AnyGraph/projeto/download_assets.py --datasets    # Baixa os datasets zero-shot (~4 GB)
+    python AnyGraph/projeto/download_assets.py --all         # Baixa modelos e datasets
 """
 
 import os
@@ -13,7 +13,7 @@ import zipfile
 import argparse
 from huggingface_hub import hf_hub_download
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "AnyGraph"))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MODELS_DIR = os.path.join(BASE_DIR, "Models")
 DATASETS_DIR = os.path.join(BASE_DIR, "Datasets")
 
