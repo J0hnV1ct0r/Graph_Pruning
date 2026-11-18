@@ -1,0 +1,14 @@
+include LICENSE README.md pyproject.toml
+include environment.lock requirements.txt
+include tests/reference/cpu-probabilities.pt
+recursive-include src *.py
+recursive-include examples *.py *.ipynb
+recursive-include docs *.md *.png *.pdf
+recursive-include tests *.py
+prune data
+prune outputs
+prune external
+prune external-weights
+prune .github
+prune docs/fonts
+global-exclude __pycache__ *.py[cod] *.ttf *.otf *.ttc *.woff *.woff2
