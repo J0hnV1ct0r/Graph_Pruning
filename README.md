@@ -2,6 +2,8 @@
 
 Repositório para investigação e experimentos de poda (pruning) em Graph Foundation Models (GFMs) baseados na arquitetura **AnyGraph**.
 
+**Documentação do que já foi feito** (modelos, protocolo, como rodar cada fase, onde estão os resultados e os relatórios): [`DOCUMENTACAO.md`](DOCUMENTACAO.md).
+
 ---
 
 ## 🚀 Configuração do Ambiente

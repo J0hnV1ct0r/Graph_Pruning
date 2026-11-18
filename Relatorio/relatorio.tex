@@ -1,0 +1,486 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+\def\UrlBreaks{\do\_\do/\do.}
+\urlstyle{tt}
+\emergencystretch=2em
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, urlcolor=blue!50!black, citecolor=blue!50!black}
+\graphicspath{{figuras/}}
+\newcommand{\bom}[1]{\textbf{#1}}
+\newcommand{\ruim}[1]{\textcolor{red!70!black}{#1}}
+
+\title{Poda de Camadas em Modelos Fundacionais para Grafos\\
+\large Relatório de Resultados}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+\section{Introdução}
+
+Modelos fundacionais para grafos (\emph{Graph Foundation Models}, GFMs) são pré-treinados uma vez e aplicados a grafos novos sem re-treino (zero-shot) ou com poucos exemplos rotulados (aprendizado em contexto). Esses modelos são grandes para o tamanho dos grafos em que costumam ser usados, e não se sabe quanto da sua profundidade é de fato necessária. Em modelos de linguagem, o ShortGPT~\cite{shortgpt} mostrou que muitas camadas mudam pouco a representação e podem ser removidas inteiras, escolhidas por uma métrica simples, o \emph{Block Influence} (BI).
+
+Este trabalho pergunta se o mesmo vale para GFMs:
+\begin{enumerate}
+  \item \textbf{O BI encontra camadas redundantes?} Isto é, a ordem de poda pelo BI é melhor que uma ordem aleatória e se aproxima de uma ordem de referência escolhida com rótulos (ablação)?
+  \item \textbf{Quanto se pode podar sem re-treino?} Curva de desempenho retido em função do número de camadas removidas, e quanto isso economiza em parâmetros, tempo e memória.
+  \item \textbf{A destilação de conhecimento (KD) recupera o modelo podado?} E começar do modelo podado é melhor do que treinar um student da mesma arquitetura a partir de pesos aleatórios?
+\end{enumerate}
+
+Foram estudados quatro \emph{prior-data fitted networks} (PFNs) de aprendizado em contexto: GraphPFN~\cite{graphpfn}, G2T-FM~\cite{g2tfm}, NodePFN~\cite{nodepfn} e Ephris~\cite{ephris}. A recuperação após a poda usa destilação de conhecimento~\cite{hinton-kd}. Para que os resultados sejam comparáveis, os quatro usam o mesmo protocolo: datasets e splits do artigo do GraphPFN, mesmas ordens de poda, mesma normalização pelo acaso e mesmo protocolo de KD. Ficaram de fora os modelos que não compartilham datasets nem protocolo com os PFNs (AnyGraph, OpenGraph e Prodigy) e a análise do GraphPFN em splits Planetoid; os resultados deles foram removidos desta versão. A Seção~\ref{sec:sintese} reúne os modelos lado a lado.
+
+A Tabela~\ref{tab:modelos} resume a origem de cada modelo. Os quatro foram pré-treinados só com dados sintéticos, então nenhum dos datasets usados aqui fez parte do pré-treino.
+
+\begin{table}[H]
+\centering
+\caption{Modelos estudados: artigo, publicação e pré-treino. Parâmetros e camadas são os do checkpoint usado aqui; o código de cada um está listado abaixo da tabela.}
+\label{tab:modelos}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{1.9cm}@{}}
+\toprule
+Modelo & Artigo & Publicação & Pré-treino & Tamanho \\
+\midrule
+GraphPFN & Eremeev et al., \emph{GraphPFN: A Prior-Data Fitted Graph Foundation Model} & ICML 2026 (PMLR 306); arXiv:2509.21489 & grafos sintéticos de um prior, a partir do LimiX & 20,09\,M; 12 camadas \\
+\addlinespace
+G2T-FM (G2T-LimiX) & Eremeev et al., \emph{Turning Tabular Foundation Models into Graph Foundation Models} & NeurIPS 2025, workshop \emph{New Perspectives in Graph ML}; arXiv:2508.20906 & nenhum em grafos; usa o LimiX-16M, pré-treinado em tabelas sintéticas (SCMs) & 16,53\,M; 12 camadas \\
+\addlinespace
+NodePFN & Choi et al., \emph{Learning Posterior Predictive Distributions for Node Classification from Synthetic Graph Priors} & ICLR 2026; arXiv:2604.19028 & grafos sintéticos de um prior & 29,01\,M; 12 camadas \\
+\addlinespace
+Ephris & Lee et al., \emph{Message Passing Does More with Less for In-Context Learning on Graphs} & preprint, arXiv:2609.37057 (2026) & 3,84\,M grafos sintéticos (SCMs) & 50,16\,M; 10 camadas MP\_ICL \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+{\raggedright\noindent Código e pesos: \path{github.com/yandex-research/graphpfn}, \path{github.com/yandex-research/G2T-FM}, \path{github.com/jeongwhanchoi/NodePFN} e \path{github.com/nums-ai/ephris} (pesos no Hugging Face, \path{nums-ai/ephris}).\par}
+
+Todos os experimentos rodaram numa única GPU de 16\,GB (RTX 5060 Ti) com 31\,GB de RAM. As adaptações que isso exigiu estão descritas em cada seção e reunidas na Seção~\ref{sec:limitacoes}.
+
+%==============================================================================
+
+%==============================================================================
+\section{GraphPFN, G2T-FM, NodePFN e Ephris}
+\label{sec:pfns}
+%==============================================================================
+
+Esta seção compara quatro PFNs para grafos quanto a \textbf{BI por camada, poda sem re-treino, KD e custo}. Os quatro foram avaliados no mesmo protocolo (mesmos datasets, splits, ordens de poda, normalização pelo acaso e KD), o que torna os números diretamente comparáveis. As diferenças inevitáveis do Ephris, que tem 10 camadas e não usa ensemble, estão descritas na Metodologia.
+
+\subsection{Os modelos}
+
+\begin{itemize}
+  \item \textbf{GraphPFN:} é o LimiX-16M com adaptadores de grafo (atenção nas arestas e MLP de grafo) em cada camada: 12 camadas e 20,09\,M parâmetros, com ICL e ensemble de 10 membros.
+  \item \textbf{G2T-FM (G2T-LimiX):} é o mesmo LimiX-16M do GraphPFN, mas \emph{sem} adaptadores de grafo. A estrutura do grafo entra como features extras (agregações de vizinhos e PEARL, de pesos fixos). São 12 camadas e 16,53\,M parâmetros, com ICL e ensemble de 10 membros. Como o modelo é o mesmo do GraphPFN sem os adaptadores, a comparação mostra se o padrão de BI vem do LimiX ou dos adaptadores.
+  \item \textbf{NodePFN:} é um PFN de grafo pré-treinado do zero, um Transformer de 12 camadas (29,01\,M parâmetros). Cada nó é um único token, com features suavizadas pelo grafo e reduzidas por TSVD. Funciona só em ICL.
+  \item \textbf{Ephris:} é um PFN de grafo baseado em passagem de mensagens, só para classificação (50,16\,M parâmetros). Um codificador de features pré-treinado (tokenizador, 3 blocos de refinamento e compressor) produz um único estado de 512 dimensões por nó, que passa por uma pilha de 10 camadas MP\_ICL com 8 nós globais. Cada camada MP\_ICL tem 2,93\,M parâmetros; juntas, são 58\% do modelo. Não há ensemble: a semente controla só o código ECOC, usado com mais de 10 classes, que não ocorre nos datasets daqui. O pré-processamento das features é o do próprio modelo. A poda remove camadas MP\_ICL inteiras.
+\end{itemize}
+
+\subsection{Metodologia}
+
+O protocolo é o do artigo do GraphPFN (Tabela~\ref{tab:gpfn-datasets-artigo}): split RL no GraphLand, split aleatório 10/10/80 nos clássicos e 3 sementes. Os datasets são tolokers-2, amazon-ratings e wiki-cs nos quatro modelos, mais city-roads-M no GraphPFN e no G2T-LimiX (o NodePFN e o Ephris não fazem regressão). As etapas são as mesmas do GraphPFN:
+\begin{enumerate}
+  \item reproduzir o modelo inteiro;
+  \item medir o BI (todos os tokens e token-alvo; no NodePFN as duas formas coincidem, porque cada nó é um token) e a ablação individual de cada camada;
+  \item podar $k=1\ldots6$ camadas sem re-treino, pelas ordens BI de todos os tokens, BI do token-alvo, ablação (referência; usa rótulos) e 3 permutações aleatórias, sempre com a camada 0 protegida;
+  \item KD com metade das camadas removidas (6 de 12; 5 de 10 no Ephris), comparando um student inicializado pelo modelo podado com um de mesma arquitetura e pesos aleatórios, no mesmo protocolo do KD do GraphPFN.
+\end{enumerate}
+\paragraph{Adaptações para o Ephris.} (i) Com 10 camadas, ``25\%'' e ``50\%'' da profundidade correspondem a $k=3$ (30\%) e $k=5$; as curvas vão até $k=6$, como nos demais. (ii) O BI de todos os nós e o BI dos nós de consulta (fora do contexto, os que o modelo prediz) fazem o papel do BI de todos os tokens e do token-alvo. Como cada nó é um único estado, as duas formas praticamente coincidem e dão a mesma ordem, como no NodePFN. (iii) No KD, o student podado mantém as 5 camadas MP\_ICL de maior BI (com a camada 0). O student aleatório tem a mesma arquitetura, com a pilha MP\_ICL (camadas e nós globais) reinicializada. Nos dois, o codificador de features é o pré-treinado e fica congelado, idêntico ao do professor; treinam-se a pilha MP\_ICL, a embedding de rótulos, as normas e a cabeça. Por isso o student aleatório do Ephris parte de uma situação mais fácil que o dos outros PFNs. (iv) O Ephris também foi rodado em outros 5 datasets do protocolo (artnet-exp, city-reviews, questions, facebook e pubmed), que não aparecem aqui por não terem par nos outros modelos.
+
+Desempenho retido, como no GraphPFN: $100\cdot(s_{\text{podado}}-s_{\text{acaso}})/(s_{\text{inteiro}}-s_{\text{acaso}})$.
+
+\subsubsection{Datasets do protocolo}
+
+Para comparar com os números publicados, a poda foi repetida com os datasets e o protocolo do artigo do GraphPFN (Seção 5.1 e Apêndice D): split RL do GraphLand, split aleatório 10/10/80 nos datasets clássicos, PCA de 64 dimensões só em amazon-ratings e questions, ensemble de 10 membros e 3 sementes (o artigo usa 10). Métricas: AP na classificação binária, acurácia na multiclasse e $R^2$ na regressão. A inferência foi feita em blocos para caber em 16\,GB de GPU, com resultado idêntico ao \emph{forward} original (diferença máxima de $0$ nas predições, verificado no tolokers-2).
+
+O artigo avalia 13 datasets (Tabela 10 do artigo): 8 do benchmark GraphLand e 5 clássicos. A Tabela~\ref{tab:gpfn-datasets-artigo} lista todos e indica quais foram usados aqui. Dez foram usados; três ficaram de fora porque não couberam na GPU de 16\,GB (o artigo usou uma A100 de 80\,GB), mesmo com a inferência em blocos. O GraphPFN processa o grafo inteiro em um único \emph{forward}, como um tensor de tamanho nós $\times$ tokens (features) $\times$ 192, e a atenção nas arestas cresce com o número de arestas:
+\begin{itemize}
+  \item \textbf{city-reviews}: é o maior em número de nós (148\,801) e tem 2,3 milhões de arestas após a simetrização;
+  \item \textbf{avazu-ctr}: tem 22 milhões de arestas após a simetrização (grau médio 288) e 229 features, o que torna os adaptadores de grafo (atenção nas arestas, por token) grandes demais;
+  \item \textbf{pubmed}: tem 500 features e, seguindo o artigo, é usado \emph{sem} PCA (o artigo relata que o PCA degrada o resultado nesse dataset), o que gera 500 tokens por nó.
+\end{itemize}
+Além disso, o facebook foi usado com uma diferença: a versão de 128 features do PyG é baixada de um domínio fora do ar, então foram usados o mesmo grafo e rótulos do repositório original (MUSAE), com as features reduzidas a 128 dimensões por TruncatedSVD.
+
+\begin{table}[H]
+\centering
+\caption{Datasets do artigo do GraphPFN (Tabela 10 do artigo) e uso neste relatório.}
+\label{tab:gpfn-datasets-artigo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrll@{}}
+\toprule
+Dataset & Coleção & Nós & Arestas & Features & Tarefa & Usado? \\
+\midrule
+artnet-exp     & GraphLand & 50\,405  & 280\,348     & 75  & Binária        & Sim \\
+city-reviews   & GraphLand & 148\,801 & 1\,165\,415  & 37  & Binária        & \ruim{Não (sem memória)} \\
+tolokers-2     & GraphLand & 11\,758  & 519\,000     & 16  & Binária        & Sim \\
+artnet-views   & GraphLand & 50\,405  & 280\,348     & 50  & Regressão      & Sim \\
+avazu-ctr      & GraphLand & 76\,269  & 10\,984\,077 & 260 & Regressão      & \ruim{Não (sem memória)} \\
+city-roads-M   & GraphLand & 57\,073  & 107\,104     & 26  & Regressão      & Sim \\
+hm-prices      & GraphLand & 46\,563  & 10\,730\,995 & 41  & Regressão      & Sim \\
+twitch-views   & GraphLand & 168\,114 & 6\,797\,557  & 4   & Regressão      & Sim \\
+amazon-ratings & Clássico  & 24\,492  & 93\,050      & 300 & Multiclasse (5)  & Sim (PCA 64) \\
+facebook       & Clássico  & 22\,470  & 170\,823     & 128 & Multiclasse (4)  & Sim (SVD) \\
+pubmed         & Clássico  & 19\,717  & 44\,324      & 500 & Multiclasse (3)  & \ruim{Não (sem memória)} \\
+questions      & Clássico  & 48\,921  & 153\,540     & 301 & Binária        & Sim (PCA 64) \\
+wiki-cs        & Clássico  & 11\,701  & 215\,603     & 300 & Multiclasse (10) & Sim \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\noindent Arestas e features conforme a Tabela 10 do artigo (arestas não direcionadas, antes da simetrização).
+
+\subsection{Resultados}
+
+\subsubsection{Modelo inteiro}
+
+\begin{table}[H]
+\centering
+\caption{Modelo inteiro no teste, média de 3 sementes, e referência publicada.}
+\label{tab:novos-inteiro}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Modelo & Dataset (métrica) & Aqui & Referência \\
+\midrule
+G2T-LimiX & tolokers-2 (AP)           & 0,618 & 0,616 \\
+G2T-LimiX & city-roads-M ($R^2$)      & 0,651 & 0,652 \\
+G2T-LimiX & amazon-ratings (acurácia) & 0,445 & 0,450 \\
+G2T-LimiX & wiki-cs (acurácia)        & 0,813 & 0,809 \\
+\midrule
+NodePFN   & tolokers-2 (AP)           & 0,415 $\pm$ 0,029 & 0,438 \\
+NodePFN   & amazon-ratings (acurácia) & 0,399 $\pm$ 0,003 & 0,412 \\
+NodePFN   & wiki-cs (acurácia)        & 0,786 $\pm$ 0,001 & 0,781 \\
+\midrule
+Ephris    & tolokers-2 (AP)           & 0,569 $\pm$ 0,001 & --- \\
+Ephris    & amazon-ratings (acurácia) & 0,436 $\pm$ 0,000 & --- \\
+Ephris    & wiki-cs (acurácia)        & 0,828 $\pm$ 0,001 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Referências: artigo do G2T-FM (Tabelas 2 e 3) e artigo do GraphPFN (Tabela 11, para o NodePFN). O G2T-LimiX reproduz o artigo com diferenças de $-0{,}005$ a $+0{,}004$. O NodePFN fica $0{,}023$ abaixo no tolokers-2 e varia muito entre sementes ($\pm 0{,}029$), com causa não identificada. No amazon-ratings, os dois modelos ficam só 0,03--0,08 acima do acaso (0,369), o que torna o desempenho retido instável nesse dataset. Para o Ephris não há referência conferida nesses splits; o modelo é praticamente determinístico entre sementes (desvio $\leq 0{,}001$).
+
+\subsubsection{Block Influence e ablação individual}
+
+\begin{table}[H]
+\centering
+\caption{Desempenho retido no teste (\%) ao remover uma única camada, média de 3 sementes. O Ephris tem 10 camadas (L0--L9).}
+\label{tab:novos-loo}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrrrrrrrr@{}}
+\toprule
+Modelo & Dataset & L0 & L1 & L2 & L3 & L4 & L5 & L6 & L7 & L8 & L9 & L10 & L11 \\
+\midrule
+GraphPFN & tolokers-2     & \ruim{12}   & \ruim{44} & 93 & 91 & 81 & 93 & 86 & 86 & 75 & 77 & 96 & 96 \\
+GraphPFN & wiki-cs        & \ruim{$-20$} & 91 & 97 & 97 & 97 & 90 & 90 & 90 & 70 & 56 & 94 & 81 \\
+GraphPFN & city-roads-M   & \ruim{$-72$} & 95 & 95 & 94 & 95 & 89 & 93 & 86 & 65 & 73 & 94 & 53 \\
+GraphPFN & amazon-ratings & \ruim{$-270$} & $-22$ & 60 & 70 & 55 & 73 & 88 & 93 & $-1$ & 39 & 85 & 83 \\
+\midrule
+G2T-LimiX & tolokers-2     & \ruim{6}    & 99 & 98 & 99 & 98 & 95 & 93 & 93 & 41 & 81 & 97 & 98 \\
+G2T-LimiX & wiki-cs        & \ruim{$-17$} & 94 & 97 & 98 & 98 & 97 & 99 & 89 & 73 & 68 & 97 & 87 \\
+G2T-LimiX & city-roads-M   & \ruim{$-3$}  & 99 & 95 & 96 & 94 & 94 & 93 & 89 & 60 & 86 & 95 & 87 \\
+G2T-LimiX & amazon-ratings & \ruim{$-317$} & 85 & 56 & 58 & 56 & 76 & 70 & 67 & $-2$ & 23 & 90 & 71 \\
+\midrule
+NodePFN & tolokers-2     & \ruim{$-26$}  & 106 & 78 & 86 & 97 & 88 & 112 & 106 & 98 & 108 & 104 & 105 \\
+NodePFN & wiki-cs        & \ruim{$-8$}   & 101 & 74 & 45 & 74 & 95 & 96 & 98 & 98 & 98 & 96 & 99 \\
+NodePFN & amazon-ratings & \ruim{$-343$} & 116 & $-18$ & $-70$ & 5 & 94 & 90 & 76 & 101 & 88 & 87 & $-7$ \\
+\midrule
+Ephris & tolokers-2     & 82 & 73 & 92 & 76 & 94 & 91 & 94 & 91 & 91 & 94 & --- & --- \\
+Ephris & wiki-cs        & 96 & 90 & 98 & 99 & 98 & 98 & 96 & 92 & 99 & 99 & --- & --- \\
+Ephris & amazon-ratings & 72 & 60 & 52 & 66 & 82 & 82 & 66 & \ruim{13} & 40 & 77 & --- & --- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Ordem de poda pelo BI cosseno (5 primeiras camadas) e correlação de Spearman entre BI e importância real (validação).}
+\label{tab:novos-bi}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llllcc@{}}
+\toprule
+Modelo & Dataset & Ordem (todos os tokens) & Ordem (token-alvo) & $\rho$ todos & $\rho$ alvo \\
+\midrule
+GraphPFN & tolokers-2     & 1, 2, 4, 3, 10 & 2, 3, 4, 10, 7 & $-0{,}10$ & 0,62 \\
+GraphPFN & wiki-cs        & 1, 2, 4, \ruim{0}, 3 & 2, 3, 4, 10, 7 & 0,48 & 0,78 \\
+GraphPFN & city-roads-M   & 1, 2, 3, 4, \ruim{0} & 2, 3, 1, 4, 10 & 0,69 & 0,80 \\
+GraphPFN & amazon-ratings & 1, 2, 4, \ruim{0}, 3 & 2, 3, 4, 10, 7 & $-0{,}37$ & 0,29 \\
+\midrule
+G2T-LimiX & tolokers-2     & 1, 2, 4, \ruim{0}, 3 & 2, 3, 4, 10, 11 & 0,52 & 0,80 \\
+G2T-LimiX & wiki-cs        & 1, 2, \ruim{0}, 4, 3 & 3, 2, 4, 10, 5 & 0,25 & 0,71 \\
+G2T-LimiX & city-roads-M   & 1, 2, 4, 3, \ruim{0} & 2, 3, 4, 1, 10 & 0,62 & 0,82 \\
+G2T-LimiX & amazon-ratings & 1, 2, 4, \ruim{0}, 3 & 2, 3, 4, 10, 7 & $-0{,}06$ & 0,08 \\
+\midrule
+NodePFN & tolokers-2     & \multicolumn{2}{c}{9, 11, 8, 5, 10} & \multicolumn{2}{c}{0,42} \\
+NodePFN & wiki-cs        & \multicolumn{2}{c}{9, 11, 7, 5, 8}  & \multicolumn{2}{c}{0,54} \\
+NodePFN & amazon-ratings & \multicolumn{2}{c}{9, 10, 11, 5, 8} & \multicolumn{2}{c}{0,37} \\
+\midrule
+Ephris & tolokers-2     & \multicolumn{2}{c}{2, 5, 4, 3, 1} & \multicolumn{2}{c}{0,10} \\
+Ephris & wiki-cs        & \multicolumn{2}{c}{2, 5, 6, 4, 1} & \multicolumn{2}{c}{$-0{,}30$} \\
+Ephris & amazon-ratings & \multicolumn{2}{c}{2, 4, 5, 1, 3} & \multicolumn{2}{c}{0,20} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{GraphPFN:} a camada 0 é indispensável e, no tolokers-2, também a 1 (44\%); o BI do token-alvo acompanha a importância ($\rho$ = 0,62--0,80 nos três datasets informativos), e o de todos os tokens não ($-0{,}10$ a 0,69).
+  \item \textbf{No G2T-LimiX o padrão do GraphPFN se repete.} As camadas 1 e 2 têm o menor BI na média de todos os tokens, e a camada 0 aparece entre as 5 primeiras. Mas a camada 0 é indispensável e é a que mais muda o token-alvo (BI do alvo 0,72--0,85). O BI do token-alvo acompanha a importância real muito melhor ($\rho$ = 0,71--0,82, contra 0,25--0,62). Como o G2T-LimiX não tem adaptadores de grafo, esse padrão vem do LimiX.
+  \item \textbf{No NodePFN o padrão é outro.} As camadas de menor BI são as finais (9, 11, 10, 8), e a correlação com a importância é moderada (0,37--0,54). Também aqui a camada 0 é a única indispensável em todos os datasets.
+  \item \textbf{No Ephris, o BI não acompanha a importância.} A camada 2 tem o menor BI nos três datasets, seguida de 4 e 5; a camada 9 tem o maior (0,74--0,77), mas removê-la sozinha retém 77--99\%. A correlação entre BI e importância fica entre $-0{,}30$ e 0,20 (calculada nas camadas 1--9, já que a 0 é protegida). Ao contrário dos outros três PFNs, a camada 0 não é indispensável: sozinha, a sua remoção retém 72--96\%. Nenhuma camada isolada derruba o modelo no tolokers-2 e no wiki-cs (mínimo de 73\% e 90\%).
+  \item \textbf{Cosseno e angular concordam.} Nos 7 casos (G2T-LimiX e NodePFN), o ranking do BI cosseno e do BI angular tem Spearman $\geq 0{,}979$ e as 6 camadas removidas no KD são as mesmas; no Ephris, o Spearman é 1,000 nos três datasets. Por isso as ordens usam só o cosseno, como no GraphPFN.
+  \item As camadas críticas além da 0 mudam com o dataset: camada 8 no G2T-LimiX; camadas 2--4 no NodePFN; no Ephris, a camada 7 no amazon-ratings (13\%) e a 1 no tolokers-2 (73\%).
+\end{itemize}
+
+\subsubsection{Poda sem re-treino}
+
+\begin{table}[H]
+\centering
+\caption{Desempenho retido no teste (\%) ao remover as $k$ primeiras camadas de cada ordem (camada 0 protegida), média de 3 sementes. Aleatória = mediana de 3 ordens. amazon-ratings omitido (modelo inteiro perto do acaso).}
+\label{tab:novos-curvas}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lllrrrrrr@{}}
+\toprule
+Modelo & Dataset & Ordem & $k=1$ & $k=2$ & $k=3$ & $k=4$ & $k=5$ & $k=6$ \\
+\midrule
+\multirow{4}{*}{GraphPFN} & \multirow{4}{*}{tolokers-2}
+  & BI todos  & \ruim{44} & 77 & 50 & 61 & 32 & 31 \\
+ & & BI alvo  & 93 & 81 & 67 & 42 & 49 & 21 \\
+ & & ablação  & 96 & 82 & 63 & 41 & 22 & 15 \\
+ & & aleatória & 91 & 61 & 57 & 47 & 20 & 12 \\
+\midrule
+\multirow{4}{*}{GraphPFN} & \multirow{4}{*}{wiki-cs}
+  & BI todos  & 91 & 92 & 68 & 64 & 37 & 1 \\
+ & & BI alvo  & 97 & 94 & 82 & 59 & 20 & $-1$ \\
+ & & ablação  & 97 & 88 & 82 & 59 & 2 & $-10$ \\
+ & & aleatória & 90 & 65 & 6 & 9 & $-13$ & $-31$ \\
+\midrule
+\multirow{4}{*}{GraphPFN} & \multirow{4}{*}{city-roads-M}
+  & BI todos  & 95 & 92 & 87 & 80 & 70 & 66 \\
+ & & BI alvo  & 95 & 92 & 87 & 80 & 75 & 66 \\
+ & & ablação  & 95 & 88 & 80 & 80 & 46 & 37 \\
+ & & aleatória & 93 & 66 & 67 & 39 & 25 & 1 \\
+\midrule
+\multirow{4}{*}{G2T-LimiX} & \multirow{4}{*}{tolokers-2}
+  & BI todos  & 99 & 96 & 75 & 64 & 46 & 42 \\
+ & & BI alvo  & 98 & 97 & 85 & 65 & 55 & 33 \\
+ & & ablação  & 99 & 97 & 93 & 65 & 38 & 20 \\
+ & & aleatória & 95 & 58 & 54 & 46 & 38 & 25 \\
+\midrule
+\multirow{4}{*}{G2T-LimiX} & \multirow{4}{*}{wiki-cs}
+  & BI todos  & 94 & 97 & 77 & 59 & 3 & 1 \\
+ & & BI alvo  & 98 & 94 & 81 & 48 & $-3$ & $-8$ \\
+ & & ablação  & 98 & 94 & 49 & 10 & $-10$ & $-13$ \\
+ & & aleatória & 98 & 70 & 25 & $-3$ & $-6$ & $-16$ \\
+\midrule
+\multirow{4}{*}{G2T-LimiX} & \multirow{4}{*}{city-roads-M}
+  & BI todos  & 99 & 89 & 79 & 71 & 39 & 32 \\
+ & & BI alvo  & 95 & 87 & 73 & 71 & 36 & 32 \\
+ & & ablação  & 99 & 92 & 84 & 67 & 36 & 35 \\
+ & & aleatória & 94 & 78 & 28 & 32 & $-41$ & 29 \\
+\midrule
+\multirow{3}{*}{NodePFN} & \multirow{3}{*}{wiki-cs}
+  & BI (todos = alvo) & 98 & 98 & 95 & 89 & 84 & 78 \\
+ & & ablação  & 101 & 99 & 97 & 94 & 90 & 84 \\
+ & & aleatória & 95 & 83 & 79 & 41 & 41 & 27 \\
+\midrule
+\multirow{3}{*}{NodePFN} & \multirow{3}{*}{tolokers-2}
+  & BI (todos = alvo) & 108 & 106 & 110 & 109 & 110 & 109 \\
+ & & ablação  & 108 & 112 & 118 & 117 & 115 & 109 \\
+ & & aleatória & 88 & 89 & 102 & 105 & 109 & 114 \\
+\midrule
+\multirow{3}{*}{Ephris} & \multirow{3}{*}{tolokers-2}
+  & BI (todos = alvo) & 92 & 88 & 73 & 53 & \ruim{$-9$} & 46 \\
+ & & ablação  & 92 & 74 & 78 & 82 & 83 & 83 \\
+ & & aleatória & 91 & 81 & 74 & 77 & 43 & 71 \\
+\midrule
+\multirow{3}{*}{Ephris} & \multirow{3}{*}{wiki-cs}
+  & BI (todos = alvo) & 98 & 92 & 44 & 63 & 18 & $-9$ \\
+ & & ablação  & 99 & 99 & 96 & 90 & 86 & 69 \\
+ & & aleatória & 99 & 88 & 46 & 17 & $-5$ & 7 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{GraphPFN no protocolo comum:} com $k=3$, o BI do token-alvo retém 67\% (tolokers-2), 82\% (wiki-cs) e 87\% (city-roads-M), contra 57\%, 6\% e 67\% da ordem aleatória, e empata com a ablação ou a supera. O BI de todos os tokens remove a camada 1 primeiro e, no tolokers-2, onde ela é crítica, perde 56 pontos já com $k=1$. No city-roads-M a poda é a mais tolerante dos PFNs no LimiX: 66\% com 6 camadas removidas.
+  \item \textbf{G2T-LimiX:} como no GraphPFN, só 1 ou 2 camadas saem sem perda grande. Com $k=3$, o BI do token-alvo retém 85\% (tolokers-2), 81\% (wiki-cs) e 73\% (city-roads-M), contra 54\%, 25\% e 28\% da ordem aleatória. O GraphPFN, no mesmo ponto, retém 67\%, 82\% e 87\%.
+  \item \textbf{NodePFN:} é o modelo mais tolerante à poda. No wiki-cs, retém 95\% com 3 camadas removidas e 78\% com 6. No tolokers-2, todas as ordens passam de 100\%, inclusive as aleatórias. Isso indica que o modelo inteiro está abaixo do seu potencial nesse dataset (ele já ficava abaixo da referência), e não que a poda ajude.
+  \item \textbf{Ephris: o BI não é melhor que a ordem aleatória.} Com $k=3$, o BI retém 73\% (tolokers-2) e 44\% (wiki-cs), contra 74\% e 46\% da aleatória. Com $k=5$, o BI cai a $-9\%$ no tolokers-2 (aleatória: 43\%) e fica em 18\% no wiki-cs (aleatória: $-5\%$). Só a ablação, que escolhe as camadas com rótulos de validação, se sustenta: 83\% e 86\% com $k=5$. Ou seja, o Ephris tem camadas removíveis, mas o BI não as encontra.
+  \item \textbf{amazon-ratings:} nos dois modelos, o retido oscila entre $+116\%$ e $-184\%$ porque o modelo inteiro está muito perto do acaso. Já com $k=3$, as ordens por BI ficam perto do acaso ou abaixo dele. No Ephris, o retido vai de $-336\%$ a $+82\%$ (BI com $k=3$: $-56\%$).
+\end{itemize}
+
+\subsubsection{KD com metade das camadas removidas}
+
+O student podado mantém as 6 camadas de maior BI (com a camada 0): no G2T-LimiX, as camadas 0, 5, 6, 8, 9 e 11 (16,53\,M $\to$ 8,56\,M, $-48\%$); no NodePFN, as camadas 0--4 e 6, ou 0--4 e 10 no wiki-cs (29,01\,M $\to$ 14,80\,M, $-49\%$); no Ephris, as camadas MP\_ICL 0, 6, 7, 8 e 9, ou 0, 3, 7, 8 e 9 no wiki-cs (50,16\,M $\to$ 35,51\,M, $-29\%$: metade das camadas MP\_ICL, mas o codificador de features não é podado).
+
+\begin{table}[H]
+\centering
+\caption{KD com metade das camadas removidas (6 de 12; 5 de 10 no Ephris), nos quatro PFNs: desempenho retido no teste (\%, normalizado pelo acaso como na poda), média de 3 sementes, antes e depois do KD. Entre parênteses, o \% do professor (student $\div$ professor) usado no EXP-004.}
+\label{tab:novos-kd}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llc|rr|rr@{}}
+\toprule
+ & & & \multicolumn{2}{c|}{Student podado} & \multicolumn{2}{c}{Student aleatório} \\
+Modelo & Dataset (métrica) & Professor & antes & depois & antes & depois \\
+\midrule
+GraphPFN  & tolokers-2 (AP)          & 0,612 & 32  & \bom{94} (95,8) & 6 & 14 (44,8) \\
+GraphPFN  & city-roads-M ($R^2$)     & 0,649 & 66  & \bom{96} (96,2) & $-24$ & 15 (15,1) \\
+GraphPFN  & wiki-cs (acurácia)       & \multicolumn{5}{c}{não cabe em 16\,GB (ver Seção~\ref{sec:limitacoes})} \\
+GraphPFN  & amazon-ratings (acurácia) & 0,439 & $-9$ & 58 (93,3) & $-279$ & $-238$ (46,3) \\
+\midrule
+G2T-LimiX & tolokers-2 (AP)          & 0,617 & 44  & \bom{91} (94,5) & 8 & 30 (54,6) \\
+G2T-LimiX & city-roads-M ($R^2$)     & 0,651 & 32  & \bom{91} (90,7) & $-25$ & 0 (0,0) \\
+G2T-LimiX & wiki-cs (acurácia)       & 0,812 & 1   & \ruim{33} (52,2) & $-21$ & $-20$ (13,6) \\
+G2T-LimiX & \quad sem parada antecipada$^\ddagger$ & 0,813 & $-6$ & \bom{95} (96,4) & $-20$ & $-3$ (26,3) \\
+G2T-LimiX & amazon-ratings (acurácia)$^\dagger$ & 0,445 & $-90$ & \ruim{$-7$} (81,6) & $-95$ & $-99$ (65,9) \\
+\midrule
+NodePFN   & tolokers-2 (AP)          & 0,415 & 109 & \bom{107} (103,3) & 6 & 73 (86,7) \\
+NodePFN   & wiki-cs (acurácia)       & 0,786 & 78  & \bom{99} (99,3) & $-22$ & $-18$ (16,2) \\
+NodePFN   & amazon-ratings (acurácia) & 0,399 & $-157$ & 33 (94,7) & $-527$ & $-516$ (53,2) \\
+\midrule
+Ephris$^\S$ & tolokers-2 (AP)          & 0,570 & $-9$ & \bom{91} (94,5) & 51 & 69 (81,0) \\
+Ephris$^\S$ & wiki-cs (acurácia)       & 0,829 & 18   & \bom{99} (99,2) & 2  & 96 (97,0) \\
+Ephris$^\S$ & amazon-ratings (acurácia) & 0,437 & $-65$ & 99 (99,8) & $-13$ & 27 (88,7) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\noindent $^\dagger$ Contexto de treino limitado a 900 nós por passo para caber em 16\,GB (desvio de protocolo). $^\ddagger$ Sensibilidade: 200 passos sem parada antecipada, mesmo lr das execuções originais; podado nas 2 sementes que tinham travado (0 e 1), aleatório nas 3 sementes. $^\S$ No Ephris, o student aleatório reinicializa só a pilha MP\_ICL; o codificador de features é o pré-treinado e congelado (ver Metodologia).
+
+\begin{itemize}
+  \item \textbf{A normalização importa.} O ``\% do professor'' esconde falhas: no amazon-ratings, 81--95\% do professor correspondem a um retido de $-7$ a 58\%, porque o professor está só 0,03--0,07 acima do acaso. Por isso a tabela usa o retido, como na poda; o amazon-ratings não é informativo para o KD no GraphPFN, no G2T-LimiX e no NodePFN. No Ephris, o podado chega a 95--101\% nas três sementes, mas o aleatório oscila (0, 0 e 82\%).
+  \item \textbf{O podado recupera, o aleatório não (GraphPFN, G2T-LimiX e NodePFN).} Nos 6 casos informativos (tolokers-2, city-roads-M e wiki-cs, excluindo o GraphPFN no wiki-cs e o NodePFN no tolokers-2), o student podado volta a 91--99\% de retido depois do KD em 5; a exceção é o G2T-LimiX no wiki-cs (33\% no protocolo principal; ver abaixo). O student aleatório, com o mesmo orçamento, fica entre $-20$ e 30\%; no city-roads-M ele converge para uma saída constante ($R^2 \approx 0$).
+  \item \textbf{A falha do G2T-LimiX no wiki-cs era da parada antecipada.} Nas sementes 0 e 1, o student podado passa por um platô com saída quase constante e a paciência de 4 avaliações encerrava o treino ali. Sem parada antecipada, as duas chegam a 0,784 (95\% de retido), igual à semente 2 do protocolo principal (0,783). O student aleatório continua no acaso mesmo sem parada antecipada.
+  \item \textbf{A vantagem do podado depende do orçamento de treino.} No GraphPFN (tolokers-2, semente 0), o student aleatório treinado por 1\,000 passos sem parada chega a 82\% de retido, contra 14\% com o protocolo principal. A conclusão correta é que o student podado recupera \emph{muito mais rápido} (menos de 200 passos), não que o aleatório nunca recupere.
+  \item \textbf{No NodePFN o KD quase não é necessário no tolokers-2,} porque o podado já supera o professor antes do treino. No wiki-cs, o KD leva o podado de 78\% para 99\%.
+  \item \textbf{No Ephris, o podado recupera e o aleatório também recupera boa parte.} O podado volta a 91\% (tolokers-2) e 99\% (wiki-cs); o aleatório chega a 69\% e 96\%. A vantagem do podado é de 22 pontos no tolokers-2 e de só 3 no wiki-cs. A diferença em relação aos outros PFNs vem do student aleatório do Ephris, que mantém o codificador pré-treinado: antes do KD ele já retém 51\% no tolokers-2. No tolokers-2, o melhor ponto do podado é o passo 190 de 200, então o orçamento limita o resultado.
+\end{itemize}
+
+\subsubsection{Custo da poda}
+
+O custo foi medido do mesmo jeito nos quatro PFNs: tolokers-2, semente 0, pipeline completo de avaliação (pré-processamento, ensemble de 10 e inferência em blocos), $k = 0, 2, 4, 6$ camadas removidas pela ordem do BI de todos os tokens (camada 0 protegida). A latência é a mediana de 3 execuções depois de 1 de aquecimento. O Ephris não tem ensemble, e $k=6$ remove 60\% das suas camadas MP\_ICL, mas só 35\% dos parâmetros.
+
+\begin{table}[H]
+\centering
+\caption{Custo por número de camadas removidas: parâmetros (M), latência de uma avaliação completa (s) e pico de memória da GPU (GB). Entre parênteses, a variação em relação ao modelo inteiro.}
+\label{tab:custo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Modelo (dataset) & Medida & $k=0$ & $k=2$ & $k=4$ & $k=6$ \\
+\midrule
+\multirow{3}{*}{GraphPFN (tolokers-2)} & Parâmetros & 20,09 & 16,84 & 13,59 & 10,35 ($-48\%$) \\
+ & Latência & 12,9 & 10,8 & 8,8 & 6,7 ($-48\%$) \\
+ & Pico GPU & 0,94 & 0,93 & 0,93 & 0,92 ($-2\%$) \\
+\midrule
+\multirow{3}{*}{G2T-LimiX (tolokers-2)} & Parâmetros & 16,53 & 13,87 & 11,22 & 8,56 ($-48\%$) \\
+ & Latência & 22,1 & 19,1 & 16,2 & 13,4 ($-39\%$) \\
+ & Pico GPU & 4,17 & 4,16 & 4,15 & 4,14 ($-1\%$) \\
+\midrule
+\multirow{3}{*}{NodePFN (tolokers-2)} & Parâmetros & 29,01 & 24,27 & 19,54 & 14,80 ($-49\%$) \\
+ & Latência & 2,50 & 2,20 & 1,91 & 1,62 ($-35\%$) \\
+ & Pico GPU & 4,30 & 4,30 & 4,30 & 4,30 ($0\%$) \\
+\midrule
+\multirow{3}{*}{Ephris (tolokers-2)} & Parâmetros & 50,16 & 44,30 & 38,44 & 32,58 ($-35\%$) \\
+ & Latência & 1,48 & 1,34 & 1,21 & 1,08 ($-27\%$) \\
+ & Pico GPU & 2,61 & 2,61 & 2,61 & 2,61 ($0\%$) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{Nos PFNs, a latência cai quase na proporção das camadas:} $-35$ a $-48\%$ com 6 de 12 camadas removidas. A parte que não cai é o pré-processamento (features de grafo e PEARL no G2T-LimiX, TSVD no NodePFN). No Ephris, a queda é menor ($-27\%$ com 6 de 10 camadas), porque o codificador de features, que não é podado, tem 42\% dos parâmetros.
+  \item \textbf{O pico de memória não muda.} Ele é dado pelas ativações de uma camada (com a inferência em blocos) e pelos dados, não pelos pesos (20\,M parâmetros ocupam menos de 0,1\,GB). Podar camadas não deixa os PFNs caberem em GPUs menores.
+\end{itemize}
+
+
+\section{Síntese entre modelos}
+\label{sec:sintese}
+
+A Tabela~\ref{tab:sintese} reúne os quatro PFNs, avaliados no protocolo comum. Nos PFNs de 12 camadas, ``25\%'' e ``50\%'' da profundidade correspondem a $k=3$ e $k=6$; no Ephris (10 camadas), a $k=3$ e $k=5$. Os valores são médias dos datasets informativos: tolokers-2, wiki-cs e city-roads-M (só wiki-cs no NodePFN, cujo tolokers-2 passa de 100\% com qualquer poda; tolokers-2 e wiki-cs no Ephris, que não faz regressão).
+
+\begin{table}[H]
+\centering
+\caption{Síntese: retido (\%) pela melhor ordem de BI (token-alvo nos PFNs) e pela ordem aleatória (mediana), correlação BI $\times$ importância, KD com $\approx$50\% dos parâmetros e redução de latência com 50\% das camadas.}
+\label{tab:sintese}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+ & \multicolumn{2}{c}{25\% removido} & \multicolumn{2}{c}{50\% removido} & & \multicolumn{2}{c}{KD (retido após)} & \\
+Modelo & BI & aleatória & BI & aleatória & $\rho$ BI & podado & aleatório & Latência \\
+\midrule
+GraphPFN       & 79 & 43 & 29 & $-6$ & 0,73 & 95 & 15 & $-48\%$ \\
+G2T-LimiX      & 80 & 36 & 19 & 13 & 0,78 & 72$^*$ & 3 & $-39\%$ \\
+NodePFN (wiki-cs) & 95 & 79 & 78 & 27 & 0,53 & 99 & $-18$ & $-35\%$ \\
+Ephris$^\dagger$  & 58 & 60 & 4 & 19 & $-0{,}10$ & 95 & 83 & $-27\%$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\noindent $^*$ Protocolo principal, como nas demais células: 91 (tolokers-2), 91 (city-roads-M) e 33 (wiki-cs). Na sensibilidade sem parada antecipada, o wiki-cs chega a 95\% e a média a 92\%; esse valor não entra na tabela porque a sensibilidade foi rodada depois de ver o resultado e só nas sementes do podado que tinham travado (Seção~\ref{sec:pfns}). $^\dagger$ BI de todos os nós (igual ao dos nós de consulta); $\rho$ é a média de 0,10 e $-0{,}30$; latência medida com 6 de 10 camadas removidas; o KD remove 5 de 10 camadas MP\_ICL ($-29\%$ dos parâmetros, não $\approx$50\%) e o student aleatório mantém o codificador pré-treinado.
+
+\begin{itemize}
+  \item \textbf{No GraphPFN, no G2T-LimiX e no NodePFN, o BI do token-alvo é uma boa ordem de poda:} retém mais que a ordem aleatória (o dobro nos PFNs do LimiX) com 25\% das camadas removidas e se aproxima da ordem de referência por ablação, sem usar rótulos. Com 50\% removido, nenhum PFN do LimiX (GraphPFN e G2T-LimiX) aguenta sem re-treino; o NodePFN é o mais tolerante.
+  \item \textbf{No Ephris, o BI não funciona como ordem de poda:} não supera a ordem aleatória (58\% contra 60\% com 25\% removido; 4\% contra 19\% com 50\%) e não se correlaciona com a importância real. O modelo tem camadas removíveis (a ablação retém 83--86\% com metade das camadas MP\_ICL removidas), mas o BI não as encontra. O bom desempenho do BI não é, portanto, uma propriedade geral dos PFNs para grafos.
+  \item \textbf{O KD recupera $\approx$50\% de poda nos quatro PFNs} (95--99\% de retido no GraphPFN, no NodePFN e no Ephris, 72\% no G2T-LimiX por causa do wiki-cs). Começar do modelo podado é essencial com orçamento curto nos três primeiros; no Ephris, cujo student aleatório mantém o codificador pré-treinado, a vantagem é menor (95\% contra 83\%).
+  \item \textbf{O ganho de custo é sobretudo de latência e de parâmetros, não de memória:} a latência dos PFNs cai 27--48\% e o pico de GPU não muda.
+\end{itemize}
+
+
+\section{Limitações}
+\label{sec:limitacoes}
+
+\begin{itemize}
+  \item \textbf{Sementes.} Os PFNs usam 3 sementes (o artigo do GraphPFN usa 10). Diferenças de poucos pontos de retido entre ordens, num mesmo $k$, não são significativas.
+  \item \textbf{Datasets pouco informativos.} No amazon-ratings os quatro PFNs ficam só 0,03--0,07 acima do acaso, e o retido oscila de forma errática. No tolokers-2, o NodePFN está abaixo da referência e quase todas as podas ``melhoram'' o modelo. Esses casos aparecem nas tabelas, mas não sustentam conclusões.
+  \item \textbf{Adaptações para 16\,GB de GPU.} A inferência dos PFNs é feita em blocos (resultado idêntico ao \emph{forward} original). No KD do G2T-LimiX no amazon-ratings, o contexto de treino foi limitado a 900 nós por passo. O KD do GraphPFN no wiki-cs não coube em memória (o contexto já tem cerca de 880 nós e limitar ainda mais não resolve) e ficou de fora.
+  \item \textbf{Cenário transdutivo.} Todos os modelos rodam sobre o grafo inteiro: features e arestas dos nós de validação e de teste entram no \emph{forward} (sem rótulos), como nos pipelines oficiais. O BI que escolhe as camadas removidas também é medido em todos os nós, e a redução de dimensão das features (PCA no GraphPFN, TruncatedSVD no NodePFN) é ajustada em todos os nós. Nenhum rótulo de validação ou de teste é usado na poda nem na perda do KD; a validação escolhe a ordem por ablação, o lr e o melhor ponto do KD, e o teste só é reportado.
+  \item \textbf{Mesmo split entre sementes.} O split RL do GraphLand é fixo e o 10/10/80 dos datasets clássicos foi sorteado uma vez (semente 0). As 3 sementes variam a aleatoriedade do modelo e do treino (membros do ensemble, lotes do KD, inicialização do student aleatório), não a divisão dos dados, então o desvio entre sementes não inclui a variação do split.
+  \item \textbf{Sensibilidade do KD fora do protocolo principal.} A execução sem parada antecipada do G2T-LimiX no wiki-cs foi feita depois de ver o resultado, e o student podado só foi repetido nas 2 sementes que tinham travado. Ela aparece como sensibilidade (Tabela~\ref{tab:novos-kd}); a Tabela~\ref{tab:sintese} usa só o protocolo principal.
+  \item \textbf{Orçamento do KD.} O protocolo principal tem até 200 passos com parada antecipada. A comparação entre student podado e aleatório depende desse orçamento: com 1\,000 passos, o aleatório do GraphPFN chega a 82\% de retido no tolokers-2 (1 semente).
+  \item \textbf{Diferenças do Ephris.} O Ephris tem 10 camadas e não usa ensemble, então ``50\%'' é $k=5$ em vez de $k=6$, e só a pilha MP\_ICL (58\% dos parâmetros) é podada. Só faz classificação, então a comparação com os outros PFNs usa tolokers-2, wiki-cs e amazon-ratings. O student aleatório do KD mantém o codificador de features pré-treinado e congelado, o que torna a comparação podado $\times$ aleatório menos exigente que nos outros PFNs. O desempenho do modelo inteiro não foi conferido com o artigo.
+  \item \textbf{Escopo.} AnyGraph, OpenGraph, Prodigy e a análise do GraphPFN em splits Planetoid foram retirados porque não compartilham datasets e protocolo com os PFNs (cora e pubmed têm versões e splits diferentes entre eles).
+\end{itemize}
+
+
+\section{Conclusão}
+
+As três perguntas da Introdução, respondidas nos quatro PFNs:
+
+\begin{enumerate}
+  \item \textbf{O BI encontra camadas redundantes?} Nos PFNs, sim, desde que medido no token que o modelo usa para predizer: o BI do token-alvo tem correlação de 0,53--0,82 com a importância real nos datasets informativos e retém o dobro da ordem aleatória. O BI de todos os tokens, que é a forma usual do ShortGPT, é enganado pelos tokens de feature e chega a escolher primeiro camadas críticas (a camada 0 e, no GraphPFN, a 1). No Ephris, porém, nenhuma das formas de BI funciona: a correlação com a importância vai de $-0{,}30$ a 0,20 e a poda por BI não é melhor que a aleatória. O BI é útil em parte dos PFNs, não em todos.
+  \item \textbf{Quanto se pode podar sem re-treino?} Pouco nos PFNs do LimiX: 1 a 2 de 12 camadas com perda pequena e cerca de 80\% retido com 3. O NodePFN aguenta mais (78\% com 6 camadas no wiki-cs). No Ephris, 1 a 2 de 10 camadas saem com perda pequena pelo BI; a ablação, que usa rótulos, retém 83--86\% com 5. A poda reduz a latência dos PFNs na proporção das camadas e não reduz o pico de memória.
+  \item \textbf{O KD recupera o modelo podado?} Sim: com cerca de metade dos parâmetros, o student podado volta a 91--99\% de retido nos PFNs, em menos de 200 passos, em 5 dos 6 casos informativos; no G2T-LimiX no wiki-cs, a parada antecipada encerra o treino num platô (33\%), e sem ela o podado chega a 95\%. Um student de pesos aleatórios não chega perto com o mesmo orçamento, mas recupera boa parte com 5 vezes mais passos, então o papel da poda é tornar o KD rápido e estável. No Ephris, o podado volta a 91\% (tolokers-2) e 99\% (wiki-cs) com 29\% menos parâmetros, e o aleatório, que mantém o codificador pré-treinado, chega a 69\% e 96\%.
+\end{enumerate}
+
+Em resumo, nos PFNs do LimiX e no NodePFN, poda por BI do token-alvo seguida de um KD curto é uma forma barata de obter modelos com metade dos parâmetros e cerca de 40\% menos latência, quase sem perda nos datasets em que o modelo inteiro é bem melhor que o acaso. No Ephris, o KD também recupera o modelo podado, mas o BI não serve para escolher as camadas, e o ganho de latência é menor (27\%), porque o codificador de features não é podado.
+
+
+\begin{thebibliography}{9}
+\bibitem{shortgpt} X. Men, M. Xu, Q. Zhang, B. Wang, H. Lin, Y. Lu, X. Han, W. Chen. \emph{ShortGPT: Layers in Large Language Models are More Redundant Than You Expect}. arXiv:2403.03853, 2024.
+\bibitem{graphpfn} D. Eremeev, O. Platonov, G. Bazhenov, A. Babenko, L. Prokhorenkova. \emph{GraphPFN: A Prior-Data Fitted Graph Foundation Model}. ICML, PMLR 306:28149--28165, 2026. arXiv:2509.21489.
+\bibitem{g2tfm} D. Eremeev, G. Bazhenov, O. Platonov, A. Babenko, L. Prokhorenkova. \emph{Turning Tabular Foundation Models into Graph Foundation Models} (G2T-FM). NeurIPS 2025 Workshop on New Perspectives in Graph Machine Learning. arXiv:2508.20906.
+\bibitem{nodepfn} J. Choi, J. Kim, W. Kang, N. Park. \emph{Learning Posterior Predictive Distributions for Node Classification from Synthetic Graph Priors} (NodePFN). ICLR, 2026. arXiv:2604.19028.
+\bibitem{ephris} D. Lee, J. Lee, M. Jeong, K. Shin, J. Yoo. \emph{Message Passing Does More with Less for In-Context Learning on Graphs} (Ephris). arXiv:2609.37057, 2026.
+\bibitem{hinton-kd} G. Hinton, O. Vinyals, J. Dean. \emph{Distilling the Knowledge in a Neural Network}. arXiv:1503.02531, 2015.
+% TODO: adicionar LimiX e GraphLand com os dados conferidos nos artigos.
+\end{thebibliography}
+
+\end{document}
