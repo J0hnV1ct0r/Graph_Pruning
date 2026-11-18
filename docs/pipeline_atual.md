@@ -35,7 +35,12 @@ análises neste protocolo).
 
 ## 2. Como rodar cada fase
 
-Tudo roda **da raiz do repositório**, no ambiente de cada modelo, com `python <Modelo>/projeto/<script>.py` ou
+**Tudo de uma vez:** `python3 rodar_pipeline.py` (raiz). Ele monta e executa, na ordem, os comandos desta seção para os
+modelos, datasets, sementes e etapas escolhidos nas variáveis do topo do arquivo (sem argumentos de linha de comando),
+pulando combinações que não se aplicam e etapas já feitas. Com `SIMULAR = True` só mostra os comandos; logs por
+comando em `logs_pipeline/`.
+
+**Um comando por vez:** tudo roda **da raiz do repositório**, no ambiente de cada modelo, com `python <Modelo>/projeto/<script>.py` ou
 `python pipeline/<script>.py`. Os scripts gravam a cada avaliação e retomam de onde pararam. A organização das
 pastas e as convenções de nomes estão em [`padroes.md`](padroes.md).
 

@@ -19,7 +19,11 @@ Tudo está no branch `main`, na raiz do repositório:
 - relatórios em `Relatorio/`.
 
 Ficam fora do git: checkpoints dos modelos, datasets, o cache de dados do Ephris e os students salvos do KD
-(`student_*.pt`, vários GB). Tudo roda da raiz do repositório. Convenções de pastas e nomes, e como trazer ou
+(`student_*.pt`, vários GB). Tudo roda da raiz do repositório.
+
+**Rodar o pipeline inteiro:** `rodar_pipeline.py`, na raiz. As opções (modelos, datasets, sementes, etapas, KD,
+simulação) são variáveis no topo do arquivo; edite e rode `python3 rodar_pipeline.py`. Com `SIMULAR = True`, que é o
+padrão, ele só mostra os comandos. Convenções de pastas e nomes, e como trazer ou
 acrescentar código e resultados: [`docs/padroes.md`](docs/padroes.md).
 
 **Resultados parciais (18/11/2026):** a parte 2 da transferência entre datasets ainda roda numa cópia de trabalho

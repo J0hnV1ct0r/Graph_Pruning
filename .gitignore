@@ -42,3 +42,5 @@ Relatorio/*.log
 Relatorio/*.out
 Relatorio/*.toc
 graphpfn)2509.21489v4.pdf
+# Logs do rodar_pipeline.py
+logs_pipeline/

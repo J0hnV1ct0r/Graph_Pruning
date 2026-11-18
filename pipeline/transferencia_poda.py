@@ -109,7 +109,7 @@ if __name__ == "__main__":
             cache = {(r.removidas, int(r.seed)): (r.val, r.test) for r in f3df.itertuples()}
         if a.modelo == "graphpfn":  # avaliações do protocolo do artigo (mesmo pipeline e sementes)
             met = {"tolokers-2": "average_precision", "questions": "average_precision", "artnet-exp": "average_precision",
-                   "wiki-cs": "accuracy", "city-roads-M": "r2"}[alvo]
+                   "wiki-cs": "accuracy", "amazon-ratings": "accuracy", "city-roads-M": "r2"}[alvo]
             art = pd.read_csv(R / "graphfpn_poda_cosseno_artigo" / "avaliacoes.csv")
             for r in art[art.dataset == alvo].itertuples():
                 conj = [int(x) for x in r.removidas.strip("[]").split(",") if x.strip()]

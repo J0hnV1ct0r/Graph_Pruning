@@ -12,6 +12,7 @@ _Atualizado em 18/11/2026._
 
 ```
 Graph_Pruning/
+├── rodar_pipeline.py          roda o pipeline inteiro; configuração nas variáveis do topo
 ├── pipeline/                  scripts comuns a vários modelos
 │   ├── fase3_ordens.py        ordens de poda (BI, ablação, aleatórias) e acaso por dataset
 │   ├── transferencia_poda.py  transferência da ordem de poda (parte 1 do EXP-013)
@@ -30,7 +31,7 @@ Modelos com `projeto/`: `AnyGraph/`, `GraphFPN/` (GraphPFN), `G2T-FM/`, `NodePFN
 do GraphPFN continuam em `GraphFPN/` (pipeline antiga).
 
 **Regra:** o código oficial de cada modelo fica onde veio; tudo o que é do projeto vai para `<Modelo>/projeto/`; o que
-serve a mais de um modelo vai para `pipeline/`. Nada de scripts soltos na raiz.
+serve a mais de um modelo vai para `pipeline/`. Na raiz, só o `rodar_pipeline.py` (ponto de entrada único).
 
 ## 2. Scripts
 
@@ -94,13 +95,15 @@ importam os de um modelo inserindo `RAIZ / "<Modelo>" / "projeto"` no `sys.path`
    `GraphFPN/projeto/fase23_graphpfn.py` e `ALL_DATASETS` em `kd_v2_graphpfn.py`; `Ephris/projeto/comum.py`);
 2. split igual em todos os modelos (`random_split` 10/10/80 com semente 0, ou o split oficial do GraphLand);
 3. acaso do dataset em `ACASO` de `pipeline/fase3_ordens.py`;
-4. rodar as fases na ordem 1 → 2 → 3 → 4 e, se for para a transferência, acrescentar o dataset em `CFG` de
+4. rodar as fases na ordem 1 → 2 → 3 → 4 (pelo `rodar_pipeline.py`, acrescentando o dataset em `SUPORTE` e em
+   `DATASETS`) e, se for para a transferência, acrescentar o dataset em `CFG` de
    `pipeline/transferencia_poda.py` e `pipeline/kd_transferencia.py` e em `MODELOS` de
    `Relatorio/transferencia/gerar_tabelas.py`.
 
 **Um modelo novo:** código oficial em `<Modelo>/` (sem o `.git` do repositório de origem), scripts em
-`<Modelo>/projeto/` com os nomes e o cabeçalho da seção 2, resultados em `<modelo>_<etapa>/`, e uma linha na tabela de
-modelos de `DOCUMENTACAO.md`.
+`<Modelo>/projeto/` com os nomes e o cabeçalho da seção 2, resultados em `<modelo>_<etapa>/`, uma linha na tabela de
+modelos de `DOCUMENTACAO.md` e as entradas do modelo em `rodar_pipeline.py` (`PYTHON`, `SUPORTE`, `CAMADAS_KD`,
+`PASTA_KD`, `PASTA_KD_TRANSF`, `SCRIPT_KD` e os comandos de cada etapa em `montar_comandos()`).
 
 ## 5. Trazer o restante da cópia de trabalho separada
 
