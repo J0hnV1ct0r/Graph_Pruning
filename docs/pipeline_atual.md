@@ -20,16 +20,50 @@ análises neste protocolo).
 - **Sementes:** 0, 1, 2 (variam o modelo e o treino, não o split).
 - **Métrica:** AP (binária), acurácia (multiclasse), $R^2$ (regressão), reportada como **desempenho retido**:
   `100·(podado − acaso)/(inteiro − acaso)`, pareado por semente.
-- **Fases:**
-  1. modelo inteiro (reprodução);
-  2. BI por camada (cosseno e angular; todos os tokens e token-alvo) e ablação individual;
-  3. poda cumulativa sem re-treino, `k = 1…6`, camada 0 protegida, ordens `bi_todos`, `bi_alvo`, `ablacao`
-     (escolhida na validação) e 3 aleatórias (`pipeline/fase3_ordens.py`);
-  4. KD com metade das camadas removidas (6 de 12; 5 de 10 no Ephris): student podado × student aleatório,
-     perda T²·KL (T = 2) sem rótulos, até 200 passos, parada antecipada com paciência 4, melhor ponto pela validação;
-  - custo: parâmetros, latência e pico de GPU com `k = 0, 2, 4, 6` (tolokers-2, semente 0);
-  - transferência entre datasets (EXP-013): ver seção 3.
 - Inferência em blocos para caber em 16 GB (resultado idêntico ao forward original).
+
+### As fases
+
+Cada fase usa o resultado da anterior. A pergunta geral é: dá para remover camadas inteiras de um PFN para grafos,
+escolhidas pelo Block Influence (BI), sem perder desempenho? E, se perder, o KD recupera?
+
+**Fase 1: modelo inteiro (referência).** Roda o modelo pré-treinado, sem nenhuma alteração, em cada dataset e
+semente, e confere se o resultado bate com o publicado no artigo. Para que serve: é o 100% do desempenho retido e
+garante que o pipeline reproduz o modelo corretamente antes de mexer nele.
+Saída: métrica do modelo inteiro por semente (`<modelo>_fase1/` ou `baseline.csv` da fase 2).
+
+**Fase 2: quanto cada camada importa.** Duas medidas, camada por camada:
+- **Block Influence (BI):** o quanto a camada muda a representação, $BI = 1 - \cos(h_{entrada}, h_{saída})$, sem usar
+  rótulos. Camada com BI baixo quase não muda nada e seria candidata a sair. É medido de duas formas: na média de
+  todos os tokens e só no token que o modelo usa para predizer (token-alvo), e com cosseno e com distância angular.
+- **Ablação individual:** remove cada camada sozinha e mede o desempenho que sobra. É a importância real da camada,
+  mas exige rótulos (usa a validação).
+Para que serve: ver se o BI, que é barato e não usa rótulos, aponta as mesmas camadas que a ablação (correlação de
+Spearman entre os dois). Saída: `<modelo>_fase2/<ds>/` (`baseline.csv`, `block_influence.csv`,
+`ablacao_individual.csv`).
+
+**Fase 3: poda sem re-treino.** Remove as `k` primeiras camadas de uma ordem, para `k = 1…6`, e mede o desempenho
+retido, sem treinar nada. A camada 0 nunca sai (removê-la derruba o modelo ao acaso). Ordens comparadas
+(`pipeline/fase3_ordens.py`): BI de todos os tokens, BI do token-alvo (menor BI primeiro), ablação (a referência,
+escolhida na validação) e 3 ordens aleatórias (o controle). Para que serve: saber quantas camadas dá para tirar sem
+perder muito e se o BI escolhe melhor que o acaso. Saída: `<modelo>_fase3/<ds>/` (`plano.csv` com as camadas
+removidas em cada caso, `avaliacoes.csv` com o resultado).
+
+**Fase 4: recuperação por destilação (KD).** Remove metade das camadas (6 de 12; 5 de 10 no Ephris), o que
+derruba o desempenho, e treina esse modelo menor (*student*) para imitar o modelo inteiro (*professor*). A perda é a
+divergência entre as saídas dos dois (T²·KL, temperatura 2), sem usar rótulos; até 200 passos, com parada antecipada
+quando a validação para de melhorar (paciência 4) e o melhor ponto escolhido pela validação. Dois students:
+- **podado:** começa do modelo com as camadas de menor BI removidas (pesos pré-treinados);
+- **aleatório:** mesma arquitetura, pesos aleatórios (no Ephris, só a pilha de camadas podadas).
+Para que serve: saber se o modelo podado recupera o desempenho com um treino curto e se começar do podado é melhor
+que começar do zero. Saída: `<modelo>_fase4_kd/` (`kd_log_*.csv` com a curva, `kd_resumo_*.json` com o resultado).
+
+**Custo.** Mede parâmetros, latência e pico de memória da GPU removendo 0, 2, 4 e 6 camadas (tolokers-2,
+semente 0). Para que serve: saber quanto a poda economiza. Saída: `custo_pfns/<modelo>.csv`.
+
+**Transferência entre datasets (EXP-013).** Repete a fase 3 com a ordem de BI de outro dataset e avalia o student da
+fase 4 em datasets diferentes do que foi usado no KD (seção 3). Para que serve: saber se a poda e o KD valem para o
+modelo em geral ou só para o dataset em que foram feitos.
 
 ---
 

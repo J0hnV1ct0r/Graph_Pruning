@@ -9,6 +9,13 @@ ambiente de cada modelo, um comando por vez, na ordem: preparação dos dados �
 → custo → resumos → transferência da ordem de poda → transferência do KD → relatórios. Os scripts gravam a cada
 avaliação e retomam o que já existe, então rodar de novo só completa o que falta.
 
+O que cada fase faz:
+  fase 1  modelo inteiro, sem alteração: é a referência (100% do desempenho retido)
+  fase 2  importância de cada camada: Block Influence (sem rótulos) e ablação individual (remove uma camada por vez)
+  fase 3  poda sem re-treino: remove as k primeiras camadas de cada ordem (BI, ablação, aleatórias), k = 1…6
+  fase 4  KD: remove metade das camadas e treina o modelo menor para imitar o inteiro (student podado × aleatório)
+Explicação completa em docs/pipeline_atual.md, seção "As fases".
+
 Comece com SIMULAR = True para ver os comandos sem executar nada.
 """
 import json
