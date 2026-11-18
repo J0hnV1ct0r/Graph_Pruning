@@ -1,0 +1,30 @@
+{
+ "dataset": "tolokers-2",
+ "task": "binclass",
+ "metric": "AP",
+ "seed": 0,
+ "prune_k": 6,
+ "student": "Podado",
+ "camadas": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  6
+ ],
+ "params": 14803476,
+ "params_teacher": 29008404,
+ "lr": 0.0003,
+ "sweep": {},
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 90,
+ "melhor_passo": 50,
+ "metric_val_melhor": 0.4622852883585938,
+ "teacher_test_ens": 0.41447642852045585,
+ "test_ens_antes": 0.42478267089647875,
+ "test_ens_ultimo": 0.39318216798942807,
+ "test_ens_melhor": 0.42957323515370927,
+ "retomado_nos_passos": []
+}

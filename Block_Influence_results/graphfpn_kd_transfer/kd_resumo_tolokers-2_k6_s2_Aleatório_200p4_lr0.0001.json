@@ -1,0 +1,31 @@
+{
+ "dataset": "tolokers-2",
+ "task": "binclass",
+ "metric": "AP",
+ "seed": 2,
+ "prune_k": 6,
+ "student": "Aleat\u00f3rio",
+ "camadas": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params": 10345933,
+ "params_teacher": 20090701,
+ "lr": 0.0001,
+ "sweep": {},
+ "t_poda": 0.0,
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 70,
+ "melhor_passo": 30,
+ "metric_val_melhor": 0.2837983194469303,
+ "teacher_test_ens": 0.6139824311948756,
+ "test_ens_antes": 0.2441357298761473,
+ "test_ens_ultimo": 0.27394832568683425,
+ "test_ens_melhor": 0.27105251512158124,
+ "retomado_nos_passos": []
+}

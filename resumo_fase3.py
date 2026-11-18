@@ -11,7 +11,8 @@ import pandas as pd
 
 from fase3_ordens import ACASO, R
 
-for modelo, f2, f3 in [("G2T-LimiX", "g2t_fase2", "g2t_fase3"), ("NodePFN", "nodepfn_fase2", "nodepfn_fase3")]:
+for modelo, f2, f3 in [("GraphPFN", "graphfpn_fase2", "graphfpn_fase3"), ("G2T-LimiX", "g2t_fase2", "g2t_fase3"),
+                       ("NodePFN", "nodepfn_fase2", "nodepfn_fase3")]:
     linhas = []
     for ds in ["tolokers-2", "amazon-ratings", "wiki-cs", "city-roads-M"]:
         d = R / f3 / ds

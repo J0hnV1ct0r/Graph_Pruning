@@ -28,3 +28,17 @@ prodigy/data/datasets/*
 # Novos GFMs: checkpoints grandes ficam fora do git
 NodePFN/models_ckpts/nodepfn/*.ckpt
 G2T-FM/checkpoints/LimiX-16M.ckpt
+
+# Transferência entre datasets (EXP-013): students e estados de treino do KD (vários GB) e arquivos temporários da fila
+Block_Influence_results/**/student_*.pt
+Block_Influence_results/**/estado_*.pt
+ADIAR_KD_ALEATORIO_CITY
+fila3_kd_aleatorio_city.sh
+# Ephris: cache de dados preparados (~125 MB)
+Ephris/projeto/cache/
+# Relatórios: arquivos auxiliares do LaTeX e o PDF do artigo do GraphPFN
+Relatorio/*.aux
+Relatorio/*.log
+Relatorio/*.out
+Relatorio/*.toc
+graphpfn)2509.21489v4.pdf

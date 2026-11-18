@@ -283,6 +283,7 @@ if __name__ == "__main__":
     ap.add_argument("--steps", type=int, default=200)
     ap.add_argument("--patience", type=int, default=4, help="avaliações sem melhora na validação; 0 = sem parada")
     ap.add_argument("--students", default="Podado,Aleatório")
+    ap.add_argument("--salvar", action="store_true", help="salva o melhor student em student_<tag>.pt")
     ap.add_argument("--lr", type=float, default=None, help="pula a varredura e usa este lr")
     ap.add_argument("--out", default="g2t_fase4_kd")
     ap.add_argument("--eval-batch", type=int, default=EVAL_BATCH,
@@ -346,6 +347,9 @@ if __name__ == "__main__":
         ultimo = avaliar_ensemble(st, t)
         st.load_state_dict(best["state"])
         melhor = avaliar_ensemble(st, t)
+        if a.salvar:
+            torch.save(dict(state=best["state"], manter=manter, kind=kind, lr=best_lr, dataset=a.dataset, seed=a.seed,
+                            melhor_passo=best["step"]), out_dir / f"student_{tag}.pt")
         info = dict(dataset=a.dataset, task=t["tipo"], metric=METRICA[t["tipo"]], seed=a.seed, prune_k=a.prune_k,
                     student=kind, camadas=manter, params=n_params(st), params_teacher=n_params(prof), lr=best_lr,
                     sweep={f"{k:g}": v for k, v in sweep.items()}, max_steps=a.steps, patience=a.patience,

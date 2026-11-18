@@ -42,12 +42,16 @@ HP = {
     "tolokers-2": dict(smoothing_steps=2, n_components=None, n_ensemble=4, svd_algorithm="randomized"),
     "amazon-ratings": dict(smoothing_steps=3, n_components=20, n_ensemble=8, svd_algorithm="randomized"),
     "wiki-cs": dict(smoothing_steps=2, n_components=15, n_ensemble=32, svd_algorithm="arpack"),
+    # Transferência (2026-11): questions com os HPs de run.sh; artnet-exp não está no artigo do NodePFN e usa os do
+    # tolokers-2, o outro dataset binário do GraphLand.
+    "questions": dict(smoothing_steps=3, n_components=25, n_ensemble=1, svd_algorithm="randomized"),
+    "artnet-exp": dict(smoothing_steps=2, n_components=None, n_ensemble=4, svd_algorithm="randomized"),
 }
 REFERENCIA = {"tolokers-2": 0.4379, "amazon-ratings": 0.4122, "wiki-cs": 0.7810}  # Tabela 11 do GraphPFN
 
 
 def carregar(name):
-    if name == "tolokers-2":
+    if name in ("tolokers-2", "artnet-exp"):
         d = GRAPHLAND / name / name / "raw" / name
         x = pd.read_csv(d / "features.csv", index_col=0).astype(np.float32).fillna(0.0).values
         y = pd.read_csv(d / "targets.csv", index_col=0).values.squeeze().astype(np.int64)
@@ -56,7 +60,7 @@ def carregar(name):
         masks = {k: m[k].values.astype(bool) for k in ["train", "val", "test"]}
     else:
         from torch_geometric.datasets import HeterophilousGraphDataset, WikiCS
-        g = (HeterophilousGraphDataset(PYG, "amazon-ratings") if name == "amazon-ratings"
+        g = (HeterophilousGraphDataset(PYG, name) if name in ("amazon-ratings", "questions")
              else WikiCS(PYG / "wiki-cs", is_undirected=True))[0]
         x, y, e = g.x.numpy().astype(np.float32), g.y.numpy().astype(np.int64), g.edge_index.numpy()
         masks = dict(np.load(SPLITS / name / "split.npz"))
@@ -159,7 +163,7 @@ if __name__ == "__main__":
     v = np.array([r["metrica_artigo_test"] for r in res.values()])
     resumo = dict(dataset=a.dataset, hp=hp, grade=grade, por_semente=res,
                   media=float(v.mean()), dp=float(v.std(ddof=1)) if len(v) > 1 else 0.0,
-                  referencia_tabela11_graphpfn=REFERENCIA[a.dataset])
+                  referencia_tabela11_graphpfn=REFERENCIA.get(a.dataset))
     json.dump(resumo, open(RESULTS / (a.saida or f"{a.dataset}.json"), "w"), indent=1)
     print(f"{a.dataset}: métrica do artigo no teste = {v.mean():.4f} ± {resumo['dp']:.4f} "
-          f"(referência {REFERENCIA[a.dataset]:.4f}); por semente {np.round(v, 4).tolist()}", flush=True)
+          f"(referência {REFERENCIA.get(a.dataset)}); por semente {np.round(v, 4).tolist()}", flush=True)

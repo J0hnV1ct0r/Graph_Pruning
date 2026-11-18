@@ -1,0 +1,30 @@
+{
+ "dataset": "wiki-cs",
+ "seed": 2,
+ "student": "Podado",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  3,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0003,
+ "sweep": {},
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 130,
+ "melhor_passo": 90,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.8222222222222222,
+ "teacher_test": 0.8291849161414379,
+ "acaso_test": 0.22956949043905567,
+ "test_antes": 0.33479329131503044,
+ "val_antes": 0.33247863247863246,
+ "test_melhor": 0.8211729516077342,
+ "val_melhor": 0.8145299145299145,
+ "test_ultimo": 0.8234163016771713,
+ "t_kd": 774.1066102981567
+}

@@ -1,0 +1,34 @@
+{
+ "dataset": "tolokers-2",
+ "seed": 0,
+ "student": "Podado",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  6,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0001,
+ "sweep": {
+  "0.0001": 0.15127155184745789,
+  "0.0003": 0.21959607303142548,
+  "0.001": 0.22703266143798828
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 200,
+ "melhor_passo": 190,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.5526745621962881,
+ "teacher_test": 0.5696753993689232,
+ "acaso_test": 0.21824173487828213,
+ "test_antes": 0.18524156687713622,
+ "val_antes": 0.19353972292103439,
+ "test_melhor": 0.5360417851516418,
+ "val_melhor": 0.5021374852182754,
+ "test_ultimo": 0.5342005866600803,
+ "t_kd": 688.0604782104492
+}

@@ -1,0 +1,30 @@
+{
+ "dataset": "wiki-cs",
+ "seed": 2,
+ "student": "Aleat\u00f3rio",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  3,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0001,
+ "sweep": {},
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 130,
+ "melhor_passo": 90,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.8196581196581196,
+ "teacher_test": 0.8283303065911761,
+ "acaso_test": 0.22956949043905567,
+ "test_antes": 0.2443115051810704,
+ "val_antes": 0.24615384615384617,
+ "test_melhor": 0.8066445892532849,
+ "val_melhor": 0.8068376068376069,
+ "test_ultimo": 0.8121995513299861,
+ "t_kd": 773.4041881561279
+}

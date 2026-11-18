@@ -1,0 +1,30 @@
+{
+ "dataset": "tolokers-2",
+ "seed": 2,
+ "student": "Aleat\u00f3rio",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  6,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0001,
+ "sweep": {},
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 200,
+ "melhor_passo": 200,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.55343209146157,
+ "teacher_test": 0.5699174947530476,
+ "acaso_test": 0.21824173487828213,
+ "test_antes": 0.40134840122802534,
+ "val_antes": 0.40456883616005934,
+ "test_melhor": 0.4823723844073174,
+ "val_melhor": 0.4603216676970474,
+ "test_ultimo": 0.4823723844073174,
+ "t_kd": 686.5247781276703
+}

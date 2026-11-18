@@ -492,6 +492,7 @@ if __name__ == "__main__":
     ap.add_argument("--lr", type=float, default=None, help="pula a varredura e usa este lr")
     ap.add_argument("--limite-ram-gb", type=float, default=3.0)
     ap.add_argument("--out", default="graphfpn_kd_v2")
+    ap.add_argument("--salvar", action="store_true", help="salva o melhor student em student_<tag>.pt")
     a = ap.parse_args()
     threading.Thread(target=vigia_memoria, args=(a.limite_ram_gb,), daemon=True).start()
 
@@ -542,6 +543,9 @@ if __name__ == "__main__":
         ultimo = evaluate_ensemble(st, t)
         st.load_state_dict(best["state"])
         melhor = evaluate_ensemble(st, t)
+        if a.salvar:
+            torch.save(dict(state=best["state"], manter=keep, kind=kind, lr=best_lr, dataset=name, seed=SEED,
+                            melhor_passo=best["step"]), out_dir / f"student_{tag}.pt")
         info = dict(dataset=name, task=t["task"], metric=PRIMARY_METRIC[t["task"]], seed=SEED, prune_k=PRUNE_K,
                     student=kind, camadas=keep, params=n_params(st), params_teacher=n_params(teacher),
                     lr=best_lr, sweep={f"{k:g}": v for k, v in sweep.items()}, t_poda=t_prune,

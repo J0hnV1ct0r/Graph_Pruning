@@ -238,6 +238,7 @@ if __name__ == "__main__":
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--patience", type=int, default=4, help="avaliações sem melhora na validação; 0 = sem parada")
     p.add_argument("--students", default="Podado,Aleatório")
+    p.add_argument("--salvar", action="store_true", help="salva o melhor student em student_<tag>.pt")
     p.add_argument("--lr", type=float, default=None, help="pula a varredura e usa este lr")
     p.add_argument("--out", default="nodepfn_fase4_kd")
     p.add_argument("--cpu", action="store_true", help="para testes")
@@ -291,6 +292,9 @@ if __name__ == "__main__":
         ultimo = avaliar_ensemble(st, t)
         st.load_state_dict(best["state"])
         melhor = avaliar_ensemble(st, t)
+        if a.salvar:
+            torch.save(dict(state=best["state"], manter=manter, kind=kind, lr=best_lr, dataset=a.dataset, seed=a.seed,
+                            melhor_passo=best["step"]), out_dir / f"student_{tag}.pt")
         info = dict(dataset=a.dataset, task="binclass" if t["binaria"] else "multiclass",
                     metric="AP" if t["binaria"] else "Acurácia", seed=a.seed, prune_k=a.prune_k, student=kind,
                     camadas=manter, params=n_params(st), params_teacher=n_params(prof), lr=best_lr,
