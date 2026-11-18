@@ -94,6 +94,8 @@ if __name__ == "__main__":
     ap.add_argument("--modelo", required=True, choices=list(CFG))
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--datasets", default=None, help="lista separada por vírgula (padrão: todos do modelo)")
+    ap.add_argument("--so-transferidas", action="store_true",
+                    help="só as ordens vindas de outros datasets (a própria e as aleatórias vêm da fase 3)")
     a = ap.parse_args()
     c = CFG[a.modelo]
     out = R / "transferencia_poda" / a.modelo / "avaliacoes.csv"
@@ -120,7 +122,7 @@ if __name__ == "__main__":
             for conj, d in f3.ablacao_conhecida(c["fase2"], alvo).items():
                 for s, vt in d.items():
                     cache.setdefault(("-".join(map(str, conj)), s), vt)
-        for origem in [alvo] + [d for d in dss if d != alvo]:
+        for origem in ([] if a.so_transferidas else [alvo]) + [d for d in dss if d != alvo]:
             ords = ordens(c["fase2"], origem, com_aleatorias=origem == alvo)
             for estr in ords:
                 for k in f3.KS:

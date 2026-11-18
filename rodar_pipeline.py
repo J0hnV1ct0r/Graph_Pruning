@@ -5,15 +5,17 @@ da raiz do repositório, com qualquer Python 3:
     python3 rodar_pipeline.py
 
 Cada etapa chama os scripts de <Modelo>/projeto/ e de pipeline/ (descritos em docs/pipeline_atual.md) com o Python do
-ambiente de cada modelo, um comando por vez, na ordem: preparação dos dados → fase 1 → fase 2 → fase 3 → fase 4 (KD)
-→ custo → resumos → transferência da ordem de poda → transferência do KD → relatórios. Os scripts gravam a cada
+ambiente de cada modelo, um comando por vez, na ordem: preparação dos dados → fase 1 → fase 2 (com a transferência da
+ordem de poda) → fase 3 → fase 4 (KD, com a transferência do KD) → custo → resumos → relatórios. Os scripts gravam a cada
 avaliação e retomam o que já existe, então rodar de novo só completa o que falta.
 
 O que cada fase faz:
   fase 1  modelo inteiro, sem alteração: é a referência (100% do desempenho retido)
-  fase 2  importância de cada camada: Block Influence (sem rótulos) e ablação individual (remove uma camada por vez)
+  fase 2  importância de cada camada: Block Influence (sem rótulos) e ablação individual (remove uma camada por vez);
+          transferência: poda cada dataset com a ordem de BI medida em outro dataset
   fase 3  poda sem re-treino: remove as k primeiras camadas de cada ordem (BI, ablação, aleatórias), k = 1…6
-  fase 4  KD: remove metade das camadas e treina o modelo menor para imitar o inteiro (student podado × aleatório)
+  fase 4  KD: remove metade das camadas e treina o modelo menor para imitar o inteiro (student podado × aleatório);
+          transferência: avalia cada student, sem treinar, nos outros datasets
 Explicação completa em docs/pipeline_atual.md, seção "As fases".
 
 Comece com SIMULAR = True para ver os comandos sem executar nada.
@@ -42,13 +44,11 @@ SEMENTES = [0, 1, 2]
 ETAPAS = {
     "preparar_dados": True,       # splits do G2T-FM/data/ (usados também pelo NodePFN)
     "fase1": True,                # modelo inteiro
-    "fase2": True,                # BI por camada e ablação individual
+    "fase2": True,                # BI por camada e ablação individual (+ transferência da ordem, se TRANSFERIR_PODA)
     "fase3": True,                # poda cumulativa sem re-treino, k = 1…6
-    "fase4_kd": True,             # KD, student podado × aleatório (salva os students para a transferência)
+    "fase4_kd": True,             # KD, student podado × aleatório (+ transferência do KD, se TRANSFERIR_KD)
     "custo": True,                # parâmetros, latência e pico de GPU (tolokers-2, semente 0)
     "resumos": True,              # tabelas-resumo das fases
-    "transferencia_poda": True,   # parte 1 do EXP-013: ordem de BI de outro dataset
-    "transferencia_kd": True,     # parte 2 do EXP-013: avalia os students da fase 4 em outros datasets (sem treinar)
     "relatorios": True,           # tabelas do relatório de transferência e compilação dos PDFs
 }
 
@@ -58,11 +58,13 @@ KD_PASSOS = 200                   # máximo de passos
 KD_PACIENCIA = 4                  # avaliações sem melhora na validação até parar (0 = sem parada antecipada)
 KD_LR = None                      # None = varredura em {1e-4, 3e-4, 1e-3}; ou um valor fixo, ex.: 1e-4
 
-# Transferência entre datasets (partes 1 e 2). Por padrão, os datasets informativos (o amazon-ratings fica perto do
-# acaso em todos os modelos e foi deixado de fora no EXP-013).
+# Transferência entre datasets (EXP-013)
+TRANSFERIR_PODA = True            # na fase 2: poda cada dataset com a ordem de BI medida em outro dataset
+TRANSFERIR_KD = True              # na fase 4: avalia cada student, sem treinar, nos outros datasets
+# Datasets da transferência. Por padrão, os informativos (o amazon-ratings fica perto do acaso em todos os modelos).
 TRANSF_DATASETS = ["tolokers-2", "wiki-cs", "city-roads-M"]
-# A parte 2 não treina de novo: avalia os students salvos pela fase 4 (pasta <modelo>_fase4_kd) ou, se lá não houver,
-# os da rodada do EXP-013 (pasta <modelo>_kd_transfer), feita quando a fase 4 ainda não salvava os students.
+# A transferência do KD não treina de novo: avalia os students salvos pela fase 4 (pasta <modelo>_fase4_kd) ou, se lá
+# não houver, os da rodada do EXP-013 (pasta <modelo>_kd_transfer), feita quando a fase 4 ainda não salvava os students.
 
 # Execução
 SIMULAR = True                    # True = só mostra os comandos, não executa nada
@@ -176,9 +178,7 @@ def montar_comandos():
             elif m == "ephris" and datasets_de(m):
                 add("fase1_ephris", [py(m), "Ephris/projeto/fase1.py", "--datasets", ",".join(datasets_de(m))])
 
-    for fase in ("fase2", "fase3"):
-        if not ETAPAS[fase]:
-            continue
+    def fase2_e_3(fase):
         n = fase[-1]
         for m in MODELOS:
             for d in datasets_de(m):
@@ -204,6 +204,23 @@ def montar_comandos():
                     add(f"fase23_ephris_{d}", [py(m), "Ephris/projeto/fase23.py", "--dataset", d],
                         pronto=R / "ephris_fase3" / d / "poda.csv")
 
+    if ETAPAS["fase2"]:
+        fase2_e_3("fase2")
+        if TRANSFERIR_PODA:  # precisa do BI de todos os datasets; a ordem própria e as aleatórias vêm da fase 3
+            for m in MODELOS:
+                dss = datasets_de(m, TRANSF_DATASETS)
+                if len(dss) < 2:
+                    continue
+                if m == "ephris":
+                    add("fase2_transf_poda_ephris", [py(m), "Ephris/projeto/transferencia_poda.py", "--datasets",
+                                                     ",".join(dss)])
+                else:
+                    add(f"fase2_transf_poda_{m}", [py(m), "pipeline/transferencia_poda.py", "--modelo", m, "--seeds",
+                                                   *s, "--datasets", ",".join(dss), "--so-transferidas"])
+
+    if ETAPAS["fase3"]:
+        fase2_e_3("fase3")
+
     if ETAPAS["fase4_kd"]:
         for m in MODELOS:
             for d in datasets_de(m):
@@ -212,6 +229,18 @@ def montar_comandos():
                     continue
                 for seed in SEMENTES:
                     add(f"kd_{m}_{d}_s{seed}", cmd_kd(m, d, seed, KD_STUDENTS, KD_LR, salvar=True))
+        if TRANSFERIR_KD:  # avalia os students salvos acima, sem treinar de novo
+            for m in MODELOS:
+                dss = datasets_de(m, TRANSF_DATASETS)
+                if len(dss) < 2:
+                    continue
+                pasta = pasta_students(m)
+                if m == "ephris":
+                    add("fase4_transf_kd_ephris", [py(m), "Ephris/projeto/kd_transferencia.py", "--pasta", pasta,
+                                                   "--alvos", ",".join(dss)])
+                else:
+                    add(f"fase4_transf_kd_{m}", [py(m), "pipeline/kd_transferencia.py", "--modelo", m, "--pasta",
+                                                 pasta, "--alvos", ",".join(dss)])
 
     if ETAPAS["custo"]:
         scripts = {"graphpfn": "GraphFPN/projeto/custo_graphpfn.py", "g2t": "G2T-FM/projeto/custo_g2t.py",
@@ -225,30 +254,6 @@ def montar_comandos():
             add(r, [py("resumos"), f"pipeline/{r}.py"])
         if "ephris" in MODELOS:
             add("resumo_ephris", [py("ephris"), "Ephris/projeto/resumo.py"])
-
-    if ETAPAS["transferencia_poda"]:
-        for m in MODELOS:
-            dss = datasets_de(m, TRANSF_DATASETS)
-            if len(dss) < 2:
-                continue
-            if m == "ephris":
-                add("transf_poda_ephris", [py(m), "Ephris/projeto/transferencia_poda.py", "--datasets", ",".join(dss)])
-            else:
-                add(f"transf_poda_{m}", [py(m), "pipeline/transferencia_poda.py", "--modelo", m, "--seeds", *s,
-                                         "--datasets", ",".join(dss)])
-
-    if ETAPAS["transferencia_kd"]:
-        for m in MODELOS:
-            dss = datasets_de(m, TRANSF_DATASETS)
-            if len(dss) < 2:
-                continue
-            pasta = pasta_students(m)
-            if m == "ephris":
-                add("transf_kd_ephris", [py(m), "Ephris/projeto/kd_transferencia.py", "--pasta", pasta,
-                                         "--alvos", ",".join(dss)])
-            else:
-                add(f"transf_kd_{m}", [py(m), "pipeline/kd_transferencia.py", "--modelo", m, "--pasta", pasta,
-                                       "--alvos", ",".join(dss)])
 
     if ETAPAS["relatorios"]:
         add("relatorio_tabelas", [py("resumos"), "Relatorio/transferencia/gerar_tabelas.py"])

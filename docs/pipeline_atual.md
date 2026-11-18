@@ -41,6 +41,10 @@ Saída: métrica do modelo inteiro por semente (`<modelo>_fase1/` ou `baseline.c
 Para que serve: ver se o BI, que é barato e não usa rótulos, aponta as mesmas camadas que a ablação (correlação de
 Spearman entre os dois). Saída: `<modelo>_fase2/<ds>/` (`baseline.csv`, `block_influence.csv`,
 `ablacao_individual.csv`).
+- **Transferência da ordem de poda (EXP-013, parte 1):** com o BI de todos os datasets pronto, poda cada dataset
+  (`k = 1…6`, sem re-treino) com a ordem de BI medida em **outro** dataset. Para que serve: saber se a ordem de BI é do
+  modelo ou do dataset, isto é, se medir o BI no próprio dataset de avaliação estava inflando o resultado. A ordem do
+  próprio dataset e as aleatórias, para comparar, vêm da fase 3. Saída: `transferencia_poda/<modelo>/avaliacoes.csv`.
 
 **Fase 3: poda sem re-treino.** Remove as `k` primeiras camadas de uma ordem, para `k = 1…6`, e mede o desempenho
 retido, sem treinar nada. A camada 0 nunca sai (removê-la derruba o modelo ao acaso). Ordens comparadas
@@ -56,14 +60,17 @@ quando a validação para de melhorar (paciência 4) e o melhor ponto escolhido 
 - **podado:** começa do modelo com as camadas de menor BI removidas (pesos pré-treinados);
 - **aleatório:** mesma arquitetura, pesos aleatórios (no Ephris, só a pilha de camadas podadas).
 Para que serve: saber se o modelo podado recupera o desempenho com um treino curto e se começar do podado é melhor
-que começar do zero. Saída: `<modelo>_fase4_kd/` (`kd_log_*.csv` com a curva, `kd_resumo_*.json` com o resultado).
+que começar do zero. Saída: `<modelo>_fase4_kd/` (`kd_log_*.csv` com a curva, `kd_resumo_*.json` com o resultado e
+`student_*.pt` com o student, fora do git).
+- **Transferência do KD (EXP-013, parte 2):** avalia cada student, sem treinar de novo, nos outros datasets (por ICL,
+  com o contexto rotulado do dataset novo), ao lado do modelo inteiro e do podado sem KD. Para que serve: saber se o
+  KD gera um modelo menor que continua geral ou um modelo específico do dataset em que foi feito. Saída:
+  `transferencia.csv` na pasta dos students.
 
 **Custo.** Mede parâmetros, latência e pico de memória da GPU removendo 0, 2, 4 e 6 camadas (tolokers-2,
 semente 0). Para que serve: saber quanto a poda economiza. Saída: `custo_pfns/<modelo>.csv`.
 
-**Transferência entre datasets (EXP-013).** Repete a fase 3 com a ordem de BI de outro dataset e avalia o student da
-fase 4 em datasets diferentes do que foi usado no KD (seção 3). Para que serve: saber se a poda e o KD valem para o
-modelo em geral ou só para o dataset em que foram feitos.
+As duas transferências estão detalhadas na seção 3.
 
 ---
 
@@ -145,13 +152,15 @@ diferenciável (diferença máxima de 1,2e-6). Os dados preparados ficam em `Eph
 
 ## 3. Transferência entre datasets (EXP-013)
 
-Pergunta: medir o BI e fazer o KD no mesmo dataset em que o resultado é avaliado infla os resultados?
+Pergunta: medir o BI e fazer o KD no mesmo dataset em que o resultado é avaliado infla os resultados? A parte 1 faz
+parte da fase 2 e a parte 2, da fase 4 (no `rodar_pipeline.py`, opções `TRANSFERIR_PODA` e `TRANSFERIR_KD`).
 
-- **Parte 1, ordem de poda transferida:** remove no dataset alvo as camadas de menor BI medidas em outro dataset.
-  - GraphPFN, G2T-LimiX, NodePFN: `pipeline/transferencia_poda.py --modelo {graphpfn,g2t,nodepfn}` (no ambiente
-    de cada modelo) → `transferencia_poda/<modelo>/avaliacoes.csv`
+- **Parte 1 (fase 2), ordem de poda transferida:** remove no dataset alvo as camadas de menor BI medidas em outro dataset.
+  - GraphPFN, G2T-LimiX, NodePFN: `pipeline/transferencia_poda.py --modelo {graphpfn,g2t,nodepfn} --so-transferidas`
+    (no ambiente de cada modelo) → `transferencia_poda/<modelo>/avaliacoes.csv`. Sem `--so-transferidas`, avalia
+    também a ordem própria e as aleatórias (útil para um dataset que ainda não passou pela fase 3).
   - Ephris: `Ephris/projeto/transferencia_poda.py` → `transferencia_poda/ephris/avaliacoes.csv`
-- **Parte 2, student do KD transferido:** avalia cada student da fase 4, sem novo treino, nos outros datasets. A fase 4
+- **Parte 2 (fase 4), student do KD transferido:** avalia cada student da fase 4, sem novo treino, nos outros datasets. A fase 4
   salva os students com `--salvar` (`rodar_pipeline.py` já faz isso), então o KD não é treinado duas vezes. Na rodada
   do EXP-013 (18/11), a fase 4 tinha sido feita antes de existir o `--salvar`; por isso o KD foi refeito uma vez, com
   o mesmo protocolo e o mesmo lr (`--out <modelo>_kd_transfer --lr <lr do protocolo>`), e reproduziu os resultados
