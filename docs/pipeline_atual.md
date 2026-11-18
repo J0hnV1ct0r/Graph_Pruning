@@ -151,12 +151,16 @@ Pergunta: medir o BI e fazer o KD no mesmo dataset em que o resultado é avaliad
   - GraphPFN, G2T-LimiX, NodePFN: `pipeline/transferencia_poda.py --modelo {graphpfn,g2t,nodepfn}` (no ambiente
     de cada modelo) → `transferencia_poda/<modelo>/avaliacoes.csv`
   - Ephris: `Ephris/projeto/transferencia_poda.py` → `transferencia_poda/ephris/avaliacoes.csv`
-- **Parte 2, student do KD transferido:** refaz o KD com `--salvar` (guarda o melhor student), `--out <modelo>_kd_transfer`
-  e o lr do protocolo principal (`--lr`), e avalia cada student, sem treino, nos outros datasets.
-  - GraphPFN, G2T-LimiX, NodePFN: `pipeline/kd_transferencia.py --modelo <m>`
-  - Ephris: `Ephris/projeto/kd_transferencia.py`
-  - Saída: `<modelo>_kd_transfer/{student_*.pt, transferencia.csv}` (`graphfpn_`, `g2t_`, `nodepfn_`, `ephris_`).
-    Os `student_*.pt` somam alguns GB e ficam fora do git (`.gitignore`).
+- **Parte 2, student do KD transferido:** avalia cada student da fase 4, sem novo treino, nos outros datasets. A fase 4
+  salva os students com `--salvar` (`rodar_pipeline.py` já faz isso), então o KD não é treinado duas vezes. Na rodada
+  do EXP-013 (18/11), a fase 4 tinha sido feita antes de existir o `--salvar`; por isso o KD foi refeito uma vez, com
+  o mesmo protocolo e o mesmo lr (`--out <modelo>_kd_transfer --lr <lr do protocolo>`), e reproduziu os resultados
+  originais. Os students dessa rodada ficaram na cópia de trabalho separada (os `.pt` não vão para o git); para
+  reavaliar, copie-os para `Block_Influence_results/<modelo>_kd_transfer/`.
+  - GraphPFN, G2T-LimiX, NodePFN: `pipeline/kd_transferencia.py --modelo <m> --pasta <pasta com os students>`
+  - Ephris: `Ephris/projeto/kd_transferencia.py --pasta <pasta com os students>`
+  - Saída: `transferencia.csv` na mesma pasta dos students (`<modelo>_fase4_kd/` nas rodadas novas;
+    `<modelo>_kd_transfer/` na rodada do EXP-013). Os `student_*.pt` somam alguns GB e ficam fora do git.
 - **Em andamento (18/11):** a fila da parte 2 roda na cópia de trabalho `.claude/worktrees/fase1-novos-gfms/`, que
   ainda usa a organização antiga das pastas; o KD do student aleatório do GraphPFN no city-roads-M foi adiado para o
   fim dela. Como trazer os resultados para o `main`: [`padroes.md`](padroes.md), seção 5.

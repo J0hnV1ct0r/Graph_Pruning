@@ -18,7 +18,6 @@ Explicação completa em docs/pipeline_atual.md, seção "As fases".
 
 Comece com SIMULAR = True para ver os comandos sem executar nada.
 """
-import json
 import subprocess
 import sys
 import time
@@ -45,11 +44,11 @@ ETAPAS = {
     "fase1": True,                # modelo inteiro
     "fase2": True,                # BI por camada e ablação individual
     "fase3": True,                # poda cumulativa sem re-treino, k = 1…6
-    "fase4_kd": True,             # KD, student podado × aleatório
+    "fase4_kd": True,             # KD, student podado × aleatório (salva os students para a transferência)
     "custo": True,                # parâmetros, latência e pico de GPU (tolokers-2, semente 0)
     "resumos": True,              # tabelas-resumo das fases
     "transferencia_poda": True,   # parte 1 do EXP-013: ordem de BI de outro dataset
-    "transferencia_kd": True,     # parte 2 do EXP-013: student do KD avaliado em outros datasets
+    "transferencia_kd": True,     # parte 2 do EXP-013: avalia os students da fase 4 em outros datasets (sem treinar)
     "relatorios": True,           # tabelas do relatório de transferência e compilação dos PDFs
 }
 
@@ -62,9 +61,8 @@ KD_LR = None                      # None = varredura em {1e-4, 3e-4, 1e-3}; ou u
 # Transferência entre datasets (partes 1 e 2). Por padrão, os datasets informativos (o amazon-ratings fica perto do
 # acaso em todos os modelos e foi deixado de fora no EXP-013).
 TRANSF_DATASETS = ["tolokers-2", "wiki-cs", "city-roads-M"]
-# Parte 2: refaz o KD salvando o student e avalia cada um nos outros datasets
-TRANSF_KD_STUDENTS = ["Podado", "Aleatório"]
-TRANSF_KD_LR_DO_PROTOCOLO = True  # True = mesmo lr escolhido no KD principal (lido de kd_resumo_*.json)
+# A parte 2 não treina de novo: avalia os students salvos pela fase 4 (pasta <modelo>_fase4_kd) ou, se lá não houver,
+# os da rodada do EXP-013 (pasta <modelo>_kd_transfer), feita quando a fase 4 ainda não salvava os students.
 
 # Execução
 SIMULAR = True                    # True = só mostra os comandos, não executa nada
@@ -123,10 +121,12 @@ def opcoes_memoria_g2t(ds):
     return []
 
 
-def lr_do_protocolo(modelo, ds, seed, kind):
-    sufixo = "_ctx900" if (modelo == "g2t" and ds == "amazon-ratings") else ""
-    f = R / PASTA_KD[modelo] / f"kd_resumo_{ds}_k{CAMADAS_KD[modelo]}_s{seed}_{kind}_200p4{sufixo}.json"
-    return json.load(open(f))["lr"] if f.exists() else None
+def pasta_students(modelo):
+    """Pasta com os student_*.pt do modelo: a da fase 4, se tiver students; senão, a da rodada do EXP-013."""
+    for pasta in (PASTA_KD[modelo], PASTA_KD_TRANSF[modelo]):
+        if any((R / pasta).glob("student_*.pt")):
+            return pasta
+    return PASTA_KD[modelo]  # serão criados pela fase 4
 
 
 def cmd_kd(modelo, ds, seed, kinds, lr, out=None, salvar=False):
@@ -211,7 +211,7 @@ def montar_comandos():
                     print(f"  aviso: KD do {m} no {d} pulado (não cabe em 16 GB).")
                     continue
                 for seed in SEMENTES:
-                    add(f"kd_{m}_{d}_s{seed}", cmd_kd(m, d, seed, KD_STUDENTS, KD_LR))
+                    add(f"kd_{m}_{d}_s{seed}", cmd_kd(m, d, seed, KD_STUDENTS, KD_LR, salvar=True))
 
     if ETAPAS["custo"]:
         scripts = {"graphpfn": "GraphFPN/projeto/custo_graphpfn.py", "g2t": "G2T-FM/projeto/custo_g2t.py",
@@ -242,20 +242,13 @@ def montar_comandos():
             dss = datasets_de(m, TRANSF_DATASETS)
             if len(dss) < 2:
                 continue
-            for d in dss:
-                if (m, d) in NAO_CABE_KD:
-                    continue
-                for seed in SEMENTES:
-                    for kind in TRANSF_KD_STUDENTS:
-                        lr = lr_do_protocolo(m, d, seed, kind) if TRANSF_KD_LR_DO_PROTOCOLO else KD_LR
-                        add(f"transf_kd_{m}_{d}_s{seed}_{kind}",
-                            cmd_kd(m, d, seed, [kind], lr, out=PASTA_KD_TRANSF[m], salvar=True))
+            pasta = pasta_students(m)
             if m == "ephris":
-                add("transf_kd_avaliacao_ephris", [py(m), "Ephris/projeto/kd_transferencia.py", "--pasta",
-                                                   PASTA_KD_TRANSF[m], "--alvos", ",".join(dss)])
+                add("transf_kd_ephris", [py(m), "Ephris/projeto/kd_transferencia.py", "--pasta", pasta,
+                                         "--alvos", ",".join(dss)])
             else:
-                add(f"transf_kd_avaliacao_{m}", [py(m), "pipeline/kd_transferencia.py", "--modelo", m,
-                                                 "--alvos", ",".join(dss)])
+                add(f"transf_kd_{m}", [py(m), "pipeline/kd_transferencia.py", "--modelo", m, "--pasta", pasta,
+                                       "--alvos", ",".join(dss)])
 
     if ETAPAS["relatorios"]:
         add("relatorio_tabelas", [py("resumos"), "Relatorio/transferencia/gerar_tabelas.py"])

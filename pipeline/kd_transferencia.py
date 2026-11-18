@@ -90,9 +90,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--modelo", required=True, choices=list(CFG))
     ap.add_argument("--alvos", default=None, help="lista separada por vírgula (padrão: todos do modelo)")
+    ap.add_argument("--pasta", default=None, help="pasta em Block_Influence_results com os student_*.pt "
+                    "(padrão: a da rodada do EXP-013, <modelo>_kd_transfer)")
     a = ap.parse_args()
     c = CFG[a.modelo]
-    pasta = R / c["pasta"]
+    pasta = R / (a.pasta or c["pasta"])
     out = pasta / "transferencia.csv"
     feitos = pd.read_csv(out) if out.exists() else pd.DataFrame()
     students = [torch.load(f, map_location="cpu", weights_only=False)

@@ -25,13 +25,13 @@ RM = RAIZ / "Block_Influence_results"
 ACASO = {"tolokers-2": 0.218, "wiki-cs": 0.230, "city-roads-M": 0.0}
 MODELOS = {
     "GraphPFN": dict(base=W, f2="graphfpn_fase2", f3="graphfpn_fase3", tr="transferencia_poda/graphpfn",
-                     ds=["tolokers-2", "wiki-cs", "city-roads-M"], estr="bi_alvo", kd="graphfpn_kd_transfer"),
+                     ds=["tolokers-2", "wiki-cs", "city-roads-M"], estr="bi_alvo", kd=["graphfpn_kd_transfer", "graphfpn_kd_v2"]),
     "G2T-LimiX": dict(base=W, f2="g2t_fase2", f3="g2t_fase3", tr="transferencia_poda/g2t",
-                      ds=["tolokers-2", "wiki-cs", "city-roads-M"], estr="bi_alvo", kd="g2t_kd_transfer"),
+                      ds=["tolokers-2", "wiki-cs", "city-roads-M"], estr="bi_alvo", kd=["g2t_kd_transfer", "g2t_fase4_kd"]),
     "NodePFN": dict(base=W, f2="nodepfn_fase2", f3="nodepfn_fase3", tr="transferencia_poda/nodepfn",
-                    ds=["tolokers-2", "wiki-cs"], estr="bi_todos", kd="nodepfn_kd_transfer"),
+                    ds=["tolokers-2", "wiki-cs"], estr="bi_todos", kd=["nodepfn_kd_transfer", "nodepfn_fase4_kd"]),
     "Ephris": dict(base=RM, f2="ephris_fase2", f3="ephris_fase3", tr="transferencia_poda/ephris",
-                   ds=["tolokers-2", "wiki-cs"], estr="bi_todos", kd="ephris_kd_transfer"),
+                   ds=["tolokers-2", "wiki-cs"], estr="bi_todos", kd=["ephris_kd_transfer", "ephris_fase4_kd"]),
 }
 KS = range(1, 7)
 METADE = {"GraphPFN": 6, "G2T-LimiX": 6, "NodePFN": 6, "Ephris": 5}  # 50% das camadas
@@ -129,9 +129,12 @@ numeros["_media_parte1"] = {k: float(v) for k, v in med.items()}
 # Parte 2: uma tabela por tipo de student; por alvo, primeiro o student do próprio alvo
 p2 = {"Podado": [], "Aleatório": []}
 for m, c in MODELOS.items():
-    f = c["base"] / c["kd"] / "transferencia.csv"
-    if not f.exists():
+    # avaliação cruzada: pasta da rodada do EXP-013 ou, nas rodadas novas, a da fase 4 (onde ficam os students)
+    fs = [c["base"] / p / "transferencia.csv" for p in c["kd"]]
+    fs = [f for f in fs if f.exists()]
+    if not fs:
         continue
+    f = fs[0]
     d = pd.read_csv(f)
     if "student" not in d:
         d["student"] = "Podado"
