@@ -1,0 +1,34 @@
+{
+ "dataset": "amazon-ratings",
+ "seed": 2,
+ "student": "Podado",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  6,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0001,
+ "sweep": {
+  "0.0001": 0.21061588823795319,
+  "0.0003": 0.2289026826620102,
+  "0.001": 0.23073367774486542
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 200,
+ "melhor_passo": 170,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.44589628419763166,
+ "teacher_test": 0.4361539246708176,
+ "acaso_test": 0.36858221904664695,
+ "test_antes": 0.324180871695417,
+ "val_antes": 0.31808901592486727,
+ "test_melhor": 0.4371236092681433,
+ "val_melhor": 0.4422213148223765,
+ "test_ultimo": 0.43329590691027864,
+ "t_kd": 4564.070604324341
+}

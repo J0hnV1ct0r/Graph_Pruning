@@ -1,0 +1,31 @@
+{
+ "dataset": "city-roads-M",
+ "task": "regression",
+ "metric": "R\u00b2",
+ "seed": 0,
+ "prune_k": 6,
+ "student": "Podado",
+ "camadas": [
+  0,
+  5,
+  6,
+  8,
+  9,
+  11
+ ],
+ "params": 10345933,
+ "params_teacher": 20090701,
+ "lr": 0.0001,
+ "sweep": {},
+ "t_poda": 4.9152748584747314,
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 200,
+ "melhor_passo": 170,
+ "metric_val_melhor": 0.631996214389801,
+ "teacher_test_ens": 0.6489430665969849,
+ "test_ens_antes": 0.4310663938522339,
+ "test_ens_ultimo": 0.6242831945419312,
+ "test_ens_melhor": 0.6294726729393005,
+ "retomado_nos_passos": []
+}

@@ -1,0 +1,133 @@
+{
+ "dataset": "wiki-cs",
+ "hp": {
+  "smoothing_steps": 2,
+  "n_components": 15,
+  "n_ensemble": 32,
+  "svd_algorithm": "arpack"
+ },
+ "grade": [
+  {
+   "smoothing_steps": 1,
+   "n_components": 15,
+   "val": 0.788034188034188,
+   "test": 0.7790834312573442
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": 20,
+   "val": 0.7794871794871795,
+   "test": 0.7758786454438629
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": 25,
+   "val": 0.7632478632478632,
+   "test": 0.7664779403909838
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": null,
+   "val": 0.7230769230769231,
+   "test": 0.7210768080333297
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 15,
+   "val": 0.7923076923076923,
+   "test": 0.7859203076594381
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 20,
+   "val": 0.7863247863247863,
+   "test": 0.7905138339920948
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 25,
+   "val": 0.7769230769230769,
+   "test": 0.7821813908770431
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": null,
+   "val": 0.7307692307692307,
+   "test": 0.7349642132250828
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 15,
+   "val": 0.7726495726495727,
+   "test": 0.7846383933340455
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 20,
+   "val": 0.7777777777777778,
+   "test": 0.7858134814656553
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 25,
+   "val": 0.7692307692307693,
+   "test": 0.7803653455827368
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": null,
+   "val": 0.7170940170940171,
+   "test": 0.7232133319089841
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 15,
+   "val": 0.770940170940171,
+   "test": 0.7819677384894776
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 20,
+   "val": 0.7760683760683761,
+   "test": 0.7830360004273048
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 25,
+   "val": 0.7717948717948718,
+   "test": 0.7818609122956949
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": null,
+   "val": 0.705982905982906,
+   "test": 0.7145604102125841
+  }
+ ],
+ "por_semente": {
+  "0": {
+   "acc_val": 0.7923076923076923,
+   "acc_test": 0.7859203076594381,
+   "metrica_artigo_test": 0.7859203076594381,
+   "metrica_artigo_val": 0.7923076923076923,
+   "tempo_s": 17.714714527130127
+  },
+  "1": {
+   "acc_val": 0.7931623931623931,
+   "acc_test": 0.7860271338532208,
+   "metrica_artigo_test": 0.7860271338532208,
+   "metrica_artigo_val": 0.7931623931623931,
+   "tempo_s": 21.30111002922058
+  },
+  "2": {
+   "acc_val": 0.7743589743589744,
+   "acc_test": 0.7848520457216109,
+   "metrica_artigo_test": 0.7848520457216109,
+   "metrica_artigo_val": 0.7743589743589744,
+   "tempo_s": 9.401602506637573
+  }
+ },
+ "media": 0.78559982907809,
+ "dp": 0.0006497983687958657,
+ "referencia_tabela11_graphpfn": 0.781
+}

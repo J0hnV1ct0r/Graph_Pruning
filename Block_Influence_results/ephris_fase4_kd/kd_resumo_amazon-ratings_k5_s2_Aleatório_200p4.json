@@ -1,0 +1,34 @@
+{
+ "dataset": "amazon-ratings",
+ "seed": 2,
+ "student": "Aleat\u00f3rio",
+ "prune_k": 5,
+ "camadas_icl": [
+  0,
+  6,
+  7,
+  8,
+  9
+ ],
+ "lr": 0.0001,
+ "sweep": {
+  "0.0001": 0.22445252537727356,
+  "0.0003": 0.23521770536899567,
+  "0.001": 0.31370073556900024
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 200,
+ "melhor_passo": 200,
+ "params_student": 35506620,
+ "params_teacher": 50163900,
+ "teacher_val": 0.44589628419763166,
+ "teacher_test": 0.4361539246708176,
+ "acaso_test": 0.36858221904664695,
+ "test_antes": 0.36858221904664695,
+ "val_antes": 0.3589220089832585,
+ "test_melhor": 0.42431356537715625,
+ "val_melhor": 0.43078807676602693,
+ "test_ultimo": 0.42431356537715625,
+ "t_kd": 4559.360762357712
+}

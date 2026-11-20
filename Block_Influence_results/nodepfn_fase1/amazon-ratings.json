@@ -1,0 +1,133 @@
+{
+ "dataset": "amazon-ratings",
+ "hp": {
+  "smoothing_steps": 2,
+  "n_components": 20,
+  "n_ensemble": 8,
+  "svd_algorithm": "randomized"
+ },
+ "grade": [
+  {
+   "smoothing_steps": 1,
+   "n_components": 15,
+   "val": 0.39893834218048185,
+   "test": 0.394202306828621
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": 20,
+   "val": 0.39648836259697834,
+   "test": 0.38853730733898134
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": 25,
+   "val": 0.4071049407921601,
+   "test": 0.3897111360620598
+  },
+  {
+   "smoothing_steps": 1,
+   "n_components": null,
+   "val": 0.40261331155573704,
+   "test": 0.3919056854139022
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 15,
+   "val": 0.40628828093099223,
+   "test": 0.3931815861998571
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 20,
+   "val": 0.41935483870967744,
+   "test": 0.40093906297846277
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": 25,
+   "val": 0.4083299305839118,
+   "test": 0.3943043788914974
+  },
+  {
+   "smoothing_steps": 2,
+   "n_components": null,
+   "val": 0.40465496120865657,
+   "test": 0.39603960396039606
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 15,
+   "val": 0.4083299305839118,
+   "test": 0.3966010003062162
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 20,
+   "val": 0.4160881992650061,
+   "test": 0.3991017658466878
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": 25,
+   "val": 0.3985300122498979,
+   "test": 0.39476370317444115
+  },
+  {
+   "smoothing_steps": 3,
+   "n_components": null,
+   "val": 0.4083299305839118,
+   "test": 0.3951719914259467
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 15,
+   "val": 0.4050632911392405,
+   "test": 0.3983362253751148
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 20,
+   "val": 0.4148632094732544,
+   "test": 0.3998162702868225
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": 25,
+   "val": 0.398121682319314,
+   "test": 0.39685618046340715
+  },
+  {
+   "smoothing_steps": 4,
+   "n_components": null,
+   "val": 0.4087382605144957,
+   "test": 0.39496784730019396
+  }
+ ],
+ "por_semente": {
+  "0": {
+   "acc_val": 0.41935483870967744,
+   "acc_test": 0.40093906297846277,
+   "metrica_artigo_test": 0.40093906297846277,
+   "metrica_artigo_val": 0.41935483870967744,
+   "tempo_s": 4.6009135246276855
+  },
+  "1": {
+   "acc_val": 0.42017149857084524,
+   "acc_test": 0.4003776666326426,
+   "metrica_artigo_test": 0.4003776666326426,
+   "metrica_artigo_val": 0.42017149857084524,
+   "tempo_s": 4.591355085372925
+  },
+  "2": {
+   "acc_val": 0.38954675377705184,
+   "acc_test": 0.3956823517403287,
+   "metrica_artigo_test": 0.3956823517403287,
+   "metrica_artigo_val": 0.38954675377705184,
+   "tempo_s": 4.581392049789429
+  }
+ },
+ "media": 0.3989996937838114,
+ "dp": 0.0028865827788872507,
+ "referencia_tabela11_graphpfn": 0.4122
+}

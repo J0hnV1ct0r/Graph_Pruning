@@ -1,0 +1,151 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+\def\UrlBreaks{\do\_\do/\do.}
+\urlstyle{tt}
+\emergencystretch=2em
+\makeatletter\newcommand{\inputtab}[1]{\@@input #1 }\makeatother
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, urlcolor=blue!50!black, citecolor=blue!50!black}
+
+\title{Poda de Camadas em PFNs para Grafos:\\
+Transferência entre Datasets\\
+\large Relatório complementar (EXP-013)}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Situação (18/11/2026, 14h40):} partes 1 e 2 concluídas nos quatro modelos, exceto o student aleatório do GraphPFN destilado no city-roads-M, ainda em treino (falta só essa origem na Tabela~\ref{tab:parte2-aleatorio}).
+
+\section{Motivação}
+
+No relatório principal, a ordem de poda (o BI) e o KD usam o mesmo dataset em que o resultado é medido. Os rótulos de teste nunca entram em nenhuma escolha, mas o BI é medido no grafo de avaliação (sem rótulos), e o student do KD é treinado nos nós de treino do mesmo grafo. Isso levanta duas perguntas:
+
+\begin{enumerate}
+  \item \textbf{A ordem de poda é do modelo ou do dataset?} Se as camadas escolhidas pelo BI de um dataset também servem em outro, a poda vale para o modelo em geral, e medir o BI no dataset de avaliação não está inflando o resultado.
+  \item \textbf{O student do KD continua sendo um modelo fundacional?} O valor de um PFN é funcionar em qualquer dataset sem treino. Se o student destilado num dataset também funciona nos outros, o KD gera um PFN menor e geral; se não, gera um modelo específico do dataset em que foi destilado.
+\end{enumerate}
+
+\paragraph{Os datasets não são de pré-treino.} Os quatro modelos foram pré-treinados só com dados sintéticos: GraphPFN (grafos sintéticos do prior), G2T-FM (LimiX, dados tabulares sintéticos), NodePFN (priors sintéticos de grafos) e Ephris (``3.84M synthetic graphs with no exposure to real-world datasets''). tolokers-2, wiki-cs e city-roads-M são datasets de avaliação; no Ephris, tolokers-2 e wiki-cs estão entre os 51 datasets de avaliação do artigo.
+
+\section{Metodologia}
+
+Modelos, pipelines, splits, sementes (0, 1, 2) e métrica de desempenho retido são os do relatório principal: $\text{retido} = 100\cdot(s - s_{\text{acaso}})/(s_{\text{inteiro}} - s_{\text{acaso}})$, pareado por semente, média de 3 sementes. Datasets: tolokers-2 e wiki-cs nos quatro modelos e city-roads-M no GraphPFN e no G2T-LimiX.
+
+\paragraph{Parte 1: ordem de poda transferida.} Para cada par de datasets diferentes (origem, alvo), as $k$ primeiras camadas da ordem de BI medida na \emph{origem} são removidas no \emph{alvo} ($k = 1\ldots6$, camada 0 protegida, sem re-treino). O resultado é comparado com a ordem de BI do próprio alvo e com a ordem aleatória (mediana de 3), ambas do relatório principal. A ordem de BI é a do token-alvo no GraphPFN e no G2T-LimiX (a forma recomendada no relatório principal) e a de todos os tokens/nós no NodePFN e no Ephris, onde as duas formas coincidem.
+
+\paragraph{Parte 2: student do KD transferido.} O KD do relatório principal é refeito com o mesmo protocolo (200 passos, paciência 4, lr escolhido no protocolo principal, 3 sementes), agora guardando o melhor student. Cada student destilado na \emph{origem} é avaliado, sem novo treino, em todos os alvos, por ICL com o contexto rotulado do alvo. No alvo, compara-se: o student destilado no próprio alvo (``próprio''), o destilado em outro dataset (``de \ldots'') e a mesma arquitetura sem KD. Origens: tolokers-2 e wiki-cs (NodePFN, Ephris), tolokers-2, wiki-cs e city-roads-M (G2T-LimiX), tolokers-2 e city-roads-M (GraphPFN, cujo KD no wiki-cs não cabe em 16\,GB; o wiki-cs entra só como alvo). Os students podado e aleatório passam pelo mesmo teste.
+
+\section{Resultados da parte 1: ordem de poda transferida}
+
+\begin{table}[H]
+\centering
+\caption{Retido no teste do alvo (\%) com 25\% e 50\% das camadas removidas ($k=3$ e $k=6$; no Ephris, $k=3$ e $k=5$). ``Transferida'' é a média sobre as origens.}
+\label{tab:resumo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+ & & \multicolumn{3}{c}{25\% removido} & \multicolumn{3}{c}{50\% removido} \\
+\cmidrule(lr){3-5}\cmidrule(l){6-8}
+Modelo & Alvo & própria & transferida & aleatória & própria & transferida & aleatória \\
+\midrule
+\inputtab{transferencia/tab_parte1_resumo.tex}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+
+\begin{itemize}
+  \item \textbf{As primeiras camadas escolhidas costumam ser as mesmas.} No GraphPFN, no G2T-LimiX e no NodePFN (14 pares origem--alvo), a ordem transferida remove exatamente as mesmas camadas da ordem própria em 10 pares com $k=1$, nos 14 com $k=2$ e em 8 com $k=3$. As diferenças de retido aparecem com mais camadas removidas, e vão para os dois lados: no GraphPFN, a ordem do city-roads-M retém 61\% no tolokers-2 com $k=4$, contra 42\% da própria, mas 32\% com $k=5$, contra 49\%.
+  \item \textbf{No Ephris, a ordem de outro dataset chega a ser muito melhor.} No wiki-cs, a ordem do tolokers-2 retém 85\% com $k=3$, contra 44\% da própria; no tolokers-2 com $k=5$, a do wiki-cs retém 59\%, contra $-9\%$. Isso é coerente com o relatório principal, em que o BI do Ephris quase não se correlaciona com a importância: as diferenças entre ordens no Ephris refletem mais a sorte de cada conjunto de camadas do que a qualidade do BI.
+  \item \textbf{Exceção: city-roads-M com muitas camadas removidas.} Nos dois PFNs do LimiX, ordens vindas de datasets de classificação falham no city-roads-M, o único dataset de regressão, quando a poda é grande. No GraphPFN, elas acompanham a própria até $k=5$ (69\% contra 75\%), mas com $k=6$ retêm 9\%, contra 66\%. No G2T-LimiX, a perda começa em $k=4$: 41\% contra 71\%, e 16\% e 4\% com $k=6$, contra 32\%. A ordem transferida serve entre tarefas do mesmo tipo; da classificação para a regressão, só com poucas camadas removidas.
+\end{itemize}
+
+\noindent\textbf{Conclusão da parte 1:} medir o BI no próprio dataset de avaliação não está inflando os resultados do relatório principal. Entre datasets de classificação, as camadas podem ser escolhidas uma vez, num dataset de calibração, e usadas nos outros, como faz o ShortGPT. Para regressão, a calibração deve usar um dataset de regressão quando a poda for grande.
+
+\begin{table}[H]
+\centering
+\caption{Retido no teste do alvo (\%) por número de camadas removidas $k$, para a ordem de BI do próprio alvo, a ordem de BI de cada outro dataset (``de \ldots'') e a ordem aleatória (mediana de 3). Média de 3 sementes.}
+\label{tab:parte1}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lllrrrrrr@{}}
+\toprule
+Modelo & Alvo & Ordem & $k=1$ & $k=2$ & $k=3$ & $k=4$ & $k=5$ & $k=6$ \\
+\midrule
+\inputtab{transferencia/tab_parte1.tex}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\noindent No NodePFN, o tolokers-2 passa de 100\% com qualquer ordem, inclusive as aleatórias, como no relatório principal (o modelo inteiro está abaixo do seu potencial nesse dataset); ele não discrimina as ordens.
+
+\section{Resultados da parte 2: student do KD transferido}
+\label{sec:parte2}
+
+Cada linha é um student avaliado no alvo, sem novo treino: ``próprio'' é o destilado no próprio alvo e ``de \ldots'' é o destilado em outro dataset. Os students ``próprios'' reproduzem o KD do relatório principal com diferença de até 3 pontos de retido (a maior: G2T-LimiX no city-roads-M, 94\% contra 91\%), por não determinismo da GPU. ``Sem KD'' é a mesma arquitetura antes do KD (podado: pesos originais com as mesmas camadas; aleatório: inicialização). Retido no teste do alvo (\%), média de 3 sementes.
+
+\begin{table}[H]
+\centering
+\caption{Student podado: retido no alvo antes e depois do KD. Expoente: número de sementes, quando menor que 3.}
+\label{tab:parte2-podado}
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+Modelo & Alvo & Student & Sem KD & Com KD \\
+\midrule
+\inputtab{transferencia/tab_parte2_podado.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{G2T-LimiX e GraphPFN: o ganho do KD transfere em parte.} O student destilado em outro dataset melhora bastante sobre o podado sem KD, mas fica abaixo do destilado no próprio alvo. No G2T-LimiX, o student do tolokers-2 retém 76\% no city-roads-M (sem KD: 32\%; próprio: 94\%), e o do city-roads-M retém 68\% no tolokers-2 (sem KD: 44\%; próprio: 91\%). No GraphPFN, o student do tolokers-2 retém 80\% no city-roads-M (sem KD: 66\%; próprio: 96\%) e 63\% no wiki-cs (sem KD: 1\%); o do city-roads-M retém 69\% no tolokers-2 (sem KD: 32\%; próprio: 93\%) e 40\% no wiki-cs. O GraphPFN não tem student próprio no wiki-cs, porque o KD nesse dataset não cabe em 16\,GB.
+  \item \textbf{No wiki-cs do G2T-LimiX, os students de fora superam o próprio} (59\% contra 33\%). O student próprio é o que trava num platô por causa da parada antecipada (relatório principal); pelo mesmo motivo, o student do wiki-cs transfere pouco (50\% e 38\%).
+  \item \textbf{NodePFN e Ephris: o ganho não transfere.} No NodePFN, o student do tolokers-2 retém 71\% no wiki-cs, abaixo do podado sem KD (74\%) e longe do próprio (99\%); o tolokers-2 do NodePFN não é informativo (passa de 100\% com qualquer student). No Ephris, o student do tolokers-2 cai a $-31\%$ no wiki-cs (sem KD: $-3\%$; próprio: 98\%): o KD num dataset piora o modelo no outro. No sentido inverso, o student do wiki-cs retém 79\% no tolokers-2 (sem KD: 59\%; próprio: 91\%).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Student aleatório (mesma arquitetura, pesos aleatórios; no Ephris, só a pilha MP\_ICL é aleatória): retido no alvo antes e depois do KD. Expoente: número de sementes, quando menor que 3.}
+\label{tab:parte2-aleatorio}
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+Modelo & Alvo & Student & Sem KD & Com KD \\
+\midrule
+\inputtab{transferencia/tab_parte2_aleatorio.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent O student aleatório quase não transfere. No G2T-LimiX e no GraphPFN, ele já fica perto do acaso no próprio dataset e abaixo dele nos outros. No NodePFN, o do tolokers-2 retém 76\% no próprio tolokers-2 (não informativo) e cai a $-33\%$ no wiki-cs; o do wiki-cs retém 41\% no tolokers-2. A exceção é o Ephris, cujo student aleatório mantém o codificador pré-treinado: o destilado no wiki-cs retém 69\% no tolokers-2, igual ao destilado no próprio tolokers-2 (70\%); no sentido inverso, cai a $-4\%$ no wiki-cs (próprio: 96\%).
+
+\noindent\textbf{Conclusão da parte 2:} os 91--99\% de retido do KD no relatório principal são, em boa parte, uma recuperação específica do dataset em que o KD foi feito. Nos PFNs do LimiX, parte do ganho vale para outros datasets; no NodePFN e no Ephris, quase nada, e no Ephris o KD pode piorar o modelo em outro dataset. Um PFN podado que continue geral exigiria destilar em vários datasets ou em dados sintéticos do prior.
+
+\section{Limitações}
+
+\begin{itemize}
+  \item \textbf{Poucos datasets por modelo.} Dois ou três datasets dão só 2 a 6 pares origem--alvo por modelo. Datasets mais leves que o city-roads-M estão planejados como próximos passos: minesweeper, amazon-photo, amazon-computers, cora e citeseer, já preparados nos quatro modelos e no \path{rodar_pipeline.py}.
+  \item \textbf{Mesmo split entre sementes} e \textbf{cenário transdutivo}, como no relatório principal.
+  \item \textbf{Efeito de benchmark no Ephris.} As ablações do artigo do Ephris usaram os 51 datasets de avaliação, entre eles tolokers-2 e wiki-cs; escolhas de projeto do modelo podem ter sido guiadas por eles. Não é contaminação de treino.
+  \item \textbf{Tempo de KD.} Os KDs da parte 2 rodaram em paralelo na GPU; o tempo de treino registrado não serve para comparar custo.
+\end{itemize}
+
+\paragraph{Fontes.}
+{\raggedright Parte 1: \path{Block_Influence_results/transferencia_poda/<modelo>/avaliacoes.csv}, gerado por \path{pipeline/transferencia_poda.py} (Ephris: \path{Ephris/projeto/transferencia_poda.py}), com as fases 2 e 3 do relatório principal. Parte 2: \path{Block_Influence_results/<modelo>_kd_transfer/transferencia.csv}, gerado por \path{pipeline/kd_transferencia.py} (Ephris: \path{Ephris/projeto/kd_transferencia.py}). Tabelas geradas por \path{Relatorio/transferencia/gerar_tabelas.py}.\par}
+
+\end{document}

@@ -1,0 +1,34 @@
+{
+ "dataset": "amazon-ratings",
+ "task": "multiclass",
+ "metric": "Acur\u00e1cia",
+ "seed": 1,
+ "prune_k": 6,
+ "student": "Aleat\u00f3rio",
+ "camadas": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "params": 14803476,
+ "params_teacher": 29008404,
+ "lr": 0.0003,
+ "sweep": {
+  "0.0001": 0.4973958134651184,
+  "0.0003": 0.4957340359687805,
+  "0.001": 0.6204134821891785
+ },
+ "max_steps": 200,
+ "patience": 4,
+ "passos_feitos": 60,
+ "melhor_passo": 20,
+ "metric_val_melhor": 0.365863617803185,
+ "teacher_test_ens": 0.4003776666326426,
+ "test_ens_antes": 0.23604164540165357,
+ "test_ens_ultimo": 0.26712258854751453,
+ "test_ens_melhor": 0.28559763192814125,
+ "retomado_nos_passos": []
+}

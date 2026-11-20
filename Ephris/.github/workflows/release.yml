@@ -1,0 +1,85 @@
+name: Publish
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-pypi
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: >-
+      github.repository == 'nums-ai/ephris' &&
+      vars.RELEASE_APPROVED == 'true' &&
+      github.sha == vars.APPROVED_RELEASE_COMMIT
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      APPROVED_COMMIT: ${{ vars.APPROVED_RELEASE_COMMIT }}
+      APPROVED_RUN: ${{ vars.APPROVED_CI_RUN_ID }}
+      WHEEL_SHA256: ${{ vars.APPROVED_WHEEL_SHA256 }}
+      SDIST_SHA256: ${{ vars.APPROVED_SDIST_SHA256 }}
+      MODEL_REVISION: ${{ vars.APPROVED_MODEL_REVISION }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify release identity and public repositories
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          def gh(path):
+              request = urllib.request.Request(
+                  'https://api.github.com/' + path,
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                           'Accept': 'application/vnd.github+json'})
+              return json.load(urllib.request.urlopen(request))
+          repo = gh('repos/nums-ai/ephris')
+          assert not repo['private'], 'GitHub must be public before publishing'
+          run = gh('repos/nums-ai/ephris/actions/runs/' + os.environ['APPROVED_RUN'])
+          assert run['conclusion'] == 'success'
+          assert run['head_sha'] == os.environ['APPROVED_COMMIT']
+          assert run['path'] == '.github/workflows/ci.yml' and run['event'] == 'push'
+          assert os.environ['GITHUB_SHA'] == run['head_sha']
+          with urllib.request.urlopen('https://huggingface.co/api/models/nums-ai/ephris') as response:
+              model = json.load(response)
+          assert model['id'] == 'nums-ai/ephris' and not model['private']
+          assert not model.get('gated', False), 'Model downloads must be ungated'
+          assert model['sha'] == os.environ['MODEL_REVISION']
+          tag = gh('repos/nums-ai/ephris/git/ref/tags/v1.0.1')['object']
+          if tag['type'] == 'tag':
+              tag = gh('repos/nums-ai/ephris/git/tags/' + tag['sha'])['object']
+          assert tag['type'] == 'commit' and tag['sha'] == run['head_sha']
+          release = gh('repos/nums-ai/ephris/releases/tags/v1.0.1')
+          assert not release['draft'] and not release['prerelease']
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions-python-3.11
+          run-id: ${{ vars.APPROVED_CI_RUN_ID }}
+          github-token: ${{ github.token }}
+          path: dist
+      - name: Verify approved distribution hashes and version
+        run: |
+          python - <<'PY'
+          import email, hashlib, os, pathlib, tarfile, zipfile
+          root = pathlib.Path('dist')
+          wheel = root / 'ephris-1.0.1-py3-none-any.whl'
+          sdist = root / 'ephris-1.0.1.tar.gz'
+          assert set(root.iterdir()) == {wheel, sdist}
+          for path, key in ((wheel, 'WHEEL_SHA256'), (sdist, 'SDIST_SHA256')):
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == os.environ[key]
+          with zipfile.ZipFile(wheel) as archive:
+              metadata = email.message_from_bytes(archive.read('ephris-1.0.1.dist-info/METADATA'))
+          with tarfile.open(sdist) as archive:
+              source_metadata = email.message_from_bytes(archive.extractfile('ephris-1.0.1/PKG-INFO').read())
+          for value in (metadata, source_metadata):
+              assert value['Name'] == 'ephris' and value['Version'] == '1.0.1'
+          PY
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,73 @@
+modelo,alvo,origem,estrategia,k,removidas,seed,val,test,fonte
+Ephris,tolokers-2,wiki-cs,bi_todos,1,2,0,0.5235797100859378,0.5415033875568253,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,1,2,1,0.5242994763030107,0.5413413468132305,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,1,2,2,0.5236501865243581,0.5411189570841866,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,2,2 5,0,0.49334956908502764,0.5257171894575283,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,2,2 5,1,0.49245884113031757,0.5253156609297494,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,2,2 5,2,0.4930113912150974,0.5265435837502597,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,3,2 5 6,0,0.4185385679611323,0.4575915515470673,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,3,2 5 6,1,0.41593719849513655,0.4594041428040546,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,3,2 5 6,2,0.41523421414782824,0.457885008889858,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,4,2 4 5 6,0,0.4412910452535074,0.46880981947671774,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,4,2 4 5 6,1,0.44195609946979886,0.47021765658688197,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,4,2 4 5 6,2,0.43981144164354236,0.46946576103689075,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,5,1 2 4 5 6,0,0.38947956207116324,0.42415646617757974,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,5,1 2 4 5 6,1,0.38924560017701615,0.4255663242081378,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,5,1 2 4 5 6,2,0.3880654720736671,0.4248137579675238,novo
+Ephris,tolokers-2,wiki-cs,bi_todos,6,1 2 3 4 5 6,0,0.36531525683009414,0.38077136056534416,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,6,1 2 3 4 5 6,1,0.3644901281916126,0.3803766993973462,fase3
+Ephris,tolokers-2,wiki-cs,bi_todos,6,1 2 3 4 5 6,2,0.3661679211338462,0.3809062665806371,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,1,2,0,0.5235797100859378,0.5415033875568253,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,1,2,1,0.5242994763030107,0.5413413468132305,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,1,2,2,0.5236501865243581,0.5411189570841866,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,2,2 5,0,0.49334956908502764,0.5257171894575283,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,2,2 5,1,0.49245884113031757,0.5253156609297494,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,2,2 5,2,0.4930113912150974,0.5265435837502597,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,3,2 5 6,0,0.4185385679611323,0.4575915515470673,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,3,2 5 6,1,0.41593719849513655,0.4594041428040546,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,3,2 5 6,2,0.41523421414782824,0.457885008889858,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,4,2 4 5 6,0,0.4412910452535074,0.46880981947671774,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,4,2 4 5 6,1,0.44195609946979886,0.47021765658688197,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,4,2 4 5 6,2,0.43981144164354236,0.46946576103689075,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,5,1 2 4 5 6,0,0.38947956207116324,0.42415646617757974,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,5,1 2 4 5 6,1,0.38924560017701615,0.4255663242081378,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,5,1 2 4 5 6,2,0.3880654720736671,0.4248137579675238,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,6,1 2 3 4 5 6,0,0.36531525683009414,0.38077136056534416,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,6,1 2 3 4 5 6,1,0.3644901281916126,0.3803766993973462,fase3
+Ephris,tolokers-2,wiki-cs,bi_alvo,6,1 2 3 4 5 6,2,0.3661679211338462,0.3809062665806371,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,1,2,0,0.805982905982906,0.8151906847559022,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,1,2,1,0.8076923076923077,0.815617989531033,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,1,2,2,0.8068376068376069,0.8167930776626429,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,2,2 5,0,0.7675213675213676,0.7792970836449097,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,2,2 5,1,0.7692307692307693,0.7784424740946481,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,2,2 5,2,0.7675213675213676,0.7779083431257344,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,3,2 4 5,0,0.7401709401709402,0.7396645657515223,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,3,2 4 5,1,0.7427350427350428,0.7392372609763914,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,3,2 4 5,2,0.7418803418803419,0.7396645657515223,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,4,2 3 4 5,0,0.6247863247863248,0.6082683473987822,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,4,2 3 4 5,1,0.6273504273504273,0.6095502617241748,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,4,2 3 4 5,2,0.6247863247863248,0.6092297831428266,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,5,1 2 3 4 5,0,0.19914529914529913,0.20969981839547058,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,5,1 2 3 4 5,1,0.2,0.21023394936438414,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,5,1 2 3 4 5,2,0.2,0.209165687426557,novo
+Ephris,wiki-cs,tolokers-2,bi_todos,6,1 2 3 4 5 6,0,0.17435897435897435,0.1775451340668732,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,6,1 2 3 4 5 6,1,0.17435897435897435,0.17722465548552505,fase3
+Ephris,wiki-cs,tolokers-2,bi_todos,6,1 2 3 4 5 6,2,0.1752136752136752,0.1775451340668732,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,1,2,0,0.805982905982906,0.8151906847559022,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,1,2,1,0.8076923076923077,0.815617989531033,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,1,2,2,0.8068376068376069,0.8167930776626429,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,2,2 5,0,0.7675213675213676,0.7792970836449097,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,2,2 5,1,0.7692307692307693,0.7784424740946481,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,2,2 5,2,0.7675213675213676,0.7779083431257344,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,3,2 4 5,0,0.7401709401709402,0.7396645657515223,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,3,2 4 5,1,0.7427350427350428,0.7392372609763914,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,3,2 4 5,2,0.7418803418803419,0.7396645657515223,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,4,2 3 4 5,0,0.6247863247863248,0.6082683473987822,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,4,2 3 4 5,1,0.6273504273504273,0.6095502617241748,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,4,2 3 4 5,2,0.6247863247863248,0.6092297831428266,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,5,1 2 3 4 5,0,0.19914529914529913,0.20969981839547058,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,5,1 2 3 4 5,1,0.2,0.21023394936438414,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,5,1 2 3 4 5,2,0.2,0.209165687426557,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,6,1 2 3 4 5 6,0,0.17435897435897435,0.1775451340668732,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,6,1 2 3 4 5 6,1,0.17435897435897435,0.17722465548552505,fase3
+Ephris,wiki-cs,tolokers-2,bi_alvo,6,1 2 3 4 5 6,2,0.1752136752136752,0.1775451340668732,fase3
