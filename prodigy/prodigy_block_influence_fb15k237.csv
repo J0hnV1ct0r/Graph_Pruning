@@ -1,5 +1,5 @@
 Bloco,Layer Index,Camada,Tipo,BI média,Desvio padrão,Lotes válidos,Nós válidos,Lotes ignorados,Métrica,Observação
-M2,0,M2 - camada 1,MetaGNNLayer,0.44012601613998414,0.015950887669792982,100,1800,0,BI (1 - cosseno),M2 calculado apenas sobre o prefixo de supernós
-M2,1,M2 - camada 2,MetaGNNLayer,0.719503710269928,0.023355510480649988,100,1800,0,BI (1 - cosseno),M2 calculado apenas sobre o prefixo de supernós
-S2,0,S2 - camada 1,SAGEConvSelfLoopsV2,1.0131933224201202,0.008992620215670443,100,165310,0,BI (1 - cosseno),Entrada projetada por lin_x antes da comparação
-S2,1,S2 - camada 2,SAGEConvSelfLoopsV2,0.17166464135050774,0.0026114561601728956,100,165310,0,BI (1 - cosseno),Entrada/saída da camada com ativação do bloco
+M2,0,M2 - camada 1,MetaGNNLayer,0.4357160371541977,0.014208115342149816,100,1800,0,BI (1 - cosseno),M2 calculado apenas sobre o prefixo de supernós
+M2,1,M2 - camada 2,MetaGNNLayer,0.7221460193395615,0.025916170324671504,100,1800,0,BI (1 - cosseno),M2 calculado apenas sobre o prefixo de supernós
+S2,0,S2 - camada 1,SAGEConvSelfLoopsV2,1.0139823985099792,0.008718227355558196,100,172296,0,BI (1 - cosseno),Entrada projetada por lin_x antes da comparação
+S2,1,S2 - camada 2,SAGEConvSelfLoopsV2,0.17097161650657655,0.002741625418982726,100,172296,0,BI (1 - cosseno),Entrada/saída da camada com ativação do bloco
